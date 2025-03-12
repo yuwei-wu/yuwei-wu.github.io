@@ -1,133 +1,97 @@
-.jumbotron {     
-    background-image: url(background.jpeg);
-	background-size: cover;
-	text-align: center;
-	background-position:center;
-	margin-bottom:0;
-	background-repeat:no-repeat;
-			
-		
-body{
-	font-family: Arial, serif, sans-serif;
-	font-weight: 80;
-} 
-
-
-}
-        .title-block{
-		    text-align:center;
-		    margin-top: 3%;
-			margin-bottom: 3%;
-			color: #563D7C;
-			font-weight: 100;
-			font-family:san-serif;
-			font-size:100%;
-		
-		}
-		
-		.subtitle{
-		    color: #563D7C;
-		    font-family: "Times New Roman", Times, serif;
-		    text-align:center;
-		    font-weight: 200;
-			margin-bottom: 2%;
-			margin-top: 2%;
-			font-size:180%;
-			font-style: italic
-		}
-		
-		.experience-title{
-		
-		    font-weight: bold; 
-		
-		}
-		
-		.content-block{		    
-			margin-bottom: 5%;		
-		
-		}
-		
-		.Penn{
-		    width:40px;
-			height:40px;
-			float:right;
-			margin:0;
-		
-		}
-		
-		#Profile{
-			margin:0;
-		}
-		#Research{
-			margin:0;
-		}
-		#Work{
-			margin:0;
-		}		
-		#Projects{
-			margin: 0;
-		}
-		#More{
-			margin: 0;
-		}		
-		.extra-roles{
-		    font-size:100%
-		
-		}
-		.sub-skills{
-		    margin: 0;
-		
-		}
-		
-		.yuwei-name{
-		    font-family: "Times New Roman", Times, serif;
-			//font-weight: bold;
-			color:#563D7C;
-			font-style:italic;
-		}
 	
-		.robotics{
-		    font-family: Arial, cursive,sans-serif; 
-			font-weight: bold;
-			color:#563D7C;
-		}
+	body {
+		font-family: Arial, serif, sans-serif;
+		font-weight: 100;
+		font-size: 100%;
+		position: relative;
+	}
+
+	.body_index {
+		font-size: 100%;
+		font-weight: 100;
+	}
+	.body_style {
+		font-size: 100%;
+		font-weight: 100;
+	}
+	.subtitle{
+		color: #563D7C;
+		font-family: "Times New Roman", Times, serif;
+		text-align:center;
+		font-weight: 100;
+		margin-bottom: 2%;
+		margin-top: 2%;
+		font-size:180%;
+		font-style: italic
+	}
+
+	
+	.content-block{		    
+		margin-bottom: 5%;		
+	
+	}
+	.Logo{
+		width:40px;
+		height:40px;
+		float:right;
+		margin:0;
+	
+	}
+	#Main-Part{
+		margin:0;
+	}
+	.extra-roles{
+		font-size:100%
+	
+	}
+	.sub-skills{
+		margin: 0;
+	
+	}
+	
+	.yuwei-name{
+		font-family: "Times New Roman", Times, serif;
+		//font-weight: bold;
+		color:#563D7C;
+		font-style:italic;
+	}
+
+	.robotics{
+		font-family: Arial, cursive,sans-serif; 
+		font-weight: bold;
+		color:#563D7C;
+	}
 
 
-		.papers{
-		    font-family: Arial, cursive,sans-serif;
-		}
+	.papers{
+		font-family: Arial, cursive,sans-serif;
+	}
 
-		.paper_title{
-		    font-family: Arial, cursive,sans-serif;
-			font-weight: bold;
-		}		
+	.paper_title{
+		font-family: Arial, cursive,sans-serif;
+		font-weight: bold;
+	}		
+	.container.custom-container-width {
+		max-width: 850px;       // 980px
+	}
 
-
-
-
-		.container.custom-container-width {
-			max-width: 850px;       // 980px
-		}
-
-		.time-place{
-		    text-align: right;
-		}
-		.circular--squareP{
-		    width:80%;
-		    height:80%;
-                    border-radius:0%;
-        }
-	    .fa_custom {
-             color: #FFD700;
-        }	
-		.navbar-custom {
-             background-color: #FFFFFF;
-        }
-		.progress{
-		    width: 30%;
-			float:right;
-		}
-        .skills{margin:10%;}
-		.copyright {text-align: center;}
-	  
-        body {position: relative;}	
+	.time-place{
+		text-align: right;
+	}
+	.circular--squareP{
+		width:80%;
+		height:80%;
+		border-radius:0%;
+	}
+	.fa_custom {
+			color: #FFD700;
+	}	
+	.navbar-custom {
+			background-color: #FFFFFF;
+	}
+	.progress{
+		width: 30%;
+		float:right;
+	}
+	.skills{margin:10%;}
+	.copyright {text-align: center;}
