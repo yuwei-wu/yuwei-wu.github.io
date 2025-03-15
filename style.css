@@ -87,6 +87,16 @@
 		height:80%;
 		border-radius:0%;
 	}
+
+	.circular--img {
+		width: auto;  /* Maintain original width */
+		height: auto; /* Maintain original height */
+		max-width: 100%; /* Prevent overflow */
+		display: block; /* Removes extra spacing */
+	}
+
+	
+
 	.fa_custom {
 			color: #FFD700;
 	}	

@@ -90,7 +90,7 @@
 							<i>
 							The goal of my research is to push the foundational limits of optimization problems, 
 							improve system robustness, and provide long-horizon guarantees for next-generation robots
-							 capable of making intelligent decisions. 
+							capable of making intelligent decisions. 
 							</i>
 
 						</div>
@@ -98,48 +98,46 @@
 		
 				</div>
 
+				<div id="bodyContent1"></div>
+				<script>
+					// Load body-content.html into the div
+
+					fetch("publications/content.html")
+					.then(response => response.text())
+					.then(data => {
+						document.getElementById("bodyContent1").innerHTML = data;
+					})
+					.catch(error => console.log("Error loading the content: ", error));
+				</script>
 
 
-                
+				<div id="bodyContent2"></div>
+				<script>
+					// Load body-content.html into the div
+
+					fetch("experience/content.html")
+					.then(response => response.text())
+					.then(data => {
+						document.getElementById("bodyContent2").innerHTML = data;
+					})
+					.catch(error => console.log("Error loading the content: ", error));
+				</script>
 
 
 
+				<div id="bodyContent3"></div>
+				<script>
+					// Load body-content.html into the div
 
-				<div class ="row">
-					<div class="col-md-12">
-						<h5 ><b>Public Service</b></h5>
-						<br/>
-					</div>
-				</div>
-		
-				<div class="col-md-12">
-					<a href="https://github.com/yuwei-wu/RoboPhD">RoboPhD</a>: 
-					Some records and notes of papers, seminars, and repos I collect.
-				</div>
-
-
-
-
-
-				<div class ="row">
-					<div class="col-md-12">
-						<h5 ><b>Resources</b></h5>
-						<br/>
-					</div>
-				</div>
-		
-				<div class="col-md-12">
-					<a href="https://github.com/yuwei-wu/RoboPhD">RoboPhD</a>: 
-					Some records and notes of papers, seminars, and repos I collect.
-				</div>
-	
-
+					fetch("contact/content.html")
+					.then(response => response.text())
+					.then(data => {
+						document.getElementById("bodyContent3").innerHTML = data;
+					})
+					.catch(error => console.log("Error loading the content: ", error));
+				</script>
 
 			</div>
-			<br/>
-			<br/>
-	
-
 
 		</section>
 	
@@ -147,13 +145,11 @@
 
 
 		<br/>
-		<br/>
 		<hr>
-
 		<div>
 			<br/>
 			<ul class="copyright",style="text-align:center;" >
-				&copy; 2025 Yuwei Wu | Last update: 05/13/2025
+				&copy; 2025 Yuwei Wu | Last update: 05/15/2025
 			</ul>
 		</div>
 
