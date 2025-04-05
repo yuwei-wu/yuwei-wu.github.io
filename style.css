@@ -75,11 +75,15 @@
 	.time-place{
 		text-align: right;
 	}
-	.circular--squareP{
-		width:80%;
-		height:80%;
-		border-radius:5%;
-	}
+	.circular--squareP {
+		width: 80%;
+		height: auto;
+		border-radius: 5%;
+		max-width: 300px;  /* Optional: limits size on large screens */
+		display: block;
+		margin: 0 auto;    /* Optional: centers the image */
+	  }
+	  
 
 	.circular--img {
 		width: auto;  /* Maintain original width */
@@ -112,6 +116,21 @@
 	.social-icon:hover {
 	    color: #563D7C;       /* Color on hover */
 	}
+
+
+
+	.centered-profile {
+		text-align: center;
+	  }
+	  
+	  .circular--squareP {
+		width: 80%;
+		height: auto;
+		border-radius: 5%;
+		max-width: 300px;
+		margin: 0 auto; /* ensures image is centered horizontally */
+	  }
+	  
 
 	/* News Section Styles */
 	.soft-border {
@@ -209,33 +228,36 @@
 	.navbar-custom .navbar-brand {
 		color: #757575;
 	}
-	
-	/* Brand text styling */
-	/* .navbar-brand {
-		height: 40px;
-		margin-left: 10px;
-		font-size: 20px;
-		display: flex;
-		align-items: center;
-	}
-	 */
+
 	/* Emphasize name part of the brand */
 	.name-bold {
 		font-weight: 600;
 	}
-	
+	.navbar-brand {
+		flex-shrink: 1;
+		min-width: 0;
+	  }
 
 		/* Show by default */
 	.navbar-brand {
 		display: flex;
 		align-items: center;
-		font-size: 20px;
+		font-size: 18px;
 		white-space: nowrap; /* prevent wrapping */
 	}
 	
 	/* Hide the text when screen is too narrow (or zoomed in) */
-	@media (max-width: 800px) {
+	@media (max-width: 650px) {
 		.navbar-brand {
 		display: none;
+		}
+
+	}
+
+	/* Hide the text when screen is too narrow (or zoomed in) */
+	@media (max-width: 700px) {
+		.circular--squareP {
+			width: 50%;
+			max-width: 300px;
 		}
 	}
