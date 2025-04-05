@@ -58,11 +58,6 @@
 		font-style:italic;
 	}
 
-	.robotics{
-		font-family: Arial, cursive,sans-serif; 
-		font-weight: bold;
-		color:#563D7C;
-	}
 
 
 	.papers{
@@ -83,7 +78,7 @@
 	.circular--squareP{
 		width:80%;
 		height:80%;
-		border-radius:0%;
+		border-radius:5%;
 	}
 
 	.circular--img {
@@ -120,7 +115,7 @@
 
 	/* News Section Styles */
 	.soft-border {
-		border-radius: 10px;      /* Adjust to your preferred curve */
+		border-radius:5%;    /* Adjust to your preferred curve */
 		overflow: hidden;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);  /* Optional: adds soft shadow */
 		transition: transform 0.3s ease;
@@ -216,16 +211,31 @@
 	}
 	
 	/* Brand text styling */
-	.navbar-brand {
+	/* .navbar-brand {
 		height: 40px;
 		margin-left: 10px;
 		font-size: 20px;
 		display: flex;
 		align-items: center;
 	}
-	
+	 */
 	/* Emphasize name part of the brand */
 	.name-bold {
 		font-weight: 600;
 	}
 	
+
+		/* Show by default */
+	.navbar-brand {
+		display: flex;
+		align-items: center;
+		font-size: 20px;
+		white-space: nowrap; /* prevent wrapping */
+	}
+	
+	/* Hide the text when screen is too narrow (or zoomed in) */
+	@media (max-width: 800px) {
+		.navbar-brand {
+		display: none;
+		}
+	}
