@@ -248,7 +248,7 @@
 	}
 	
 	/* Hide the text when screen is too narrow (or zoomed in) */
-	@media (max-width: 650px) {
+	@media (max-width: 800px) {
 		.navbar-brand {
 		display: none;
 		}
