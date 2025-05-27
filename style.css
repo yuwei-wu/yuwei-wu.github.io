@@ -70,7 +70,7 @@
 		font-weight: bold;
 	}		
 	.container.custom-container-width {
-		max-width: 900px; 
+		max-width: 1000px; 
 	}
 
 	.time-place{
@@ -80,7 +80,7 @@
 		width: 80%;
 		height: auto;
 		border-radius: 5%;
-		max-width: 300px;  /* Optional: limits size on large screens */
+		max-width: 100px;  /* Optional: limits size on large screens */
 		display: block;
 		margin: 0 auto;    /* Optional: centers the image */
 	  }
