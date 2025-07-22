@@ -14,13 +14,12 @@
 	}
 	.subtitle{
 		color: #563D7C;
-		font-family:  Arial, serif, sans-serif;
+		font-family:  'Lato', sans-serif;
 		text-align:center;
-		font-weight: 500;
+		font-weight: 360;
 		margin-bottom: 2%;
 		margin-top: 2%;
-		font-size:160%;
-		font-style: italic;
+		font-size:190%;
 	}
 
 	strong {
@@ -281,4 +280,55 @@
 		height: 100%;
 		border: none;
 	}
-	
+
+	.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 20px;
+	}
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f9f9f9;
+  margin: 0;
+}
+
+/* Center the entire grid container */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1200px;     /* optional: controls how wide the content can stretch */
+  margin: 0 auto;        /* centers the grid horizontally */
+  justify-items: center; /* ensures each card is centered in its cell */
+}
+
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+  padding: 10px;
+  width: 100%;           /* ensures it fits inside grid cell */
+  max-width: 300px;      /* optional: sets max width of each card */
+  text-align:center;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.caption {
+  padding: 10px;
+  font-weight: bold;
+  color: #800000;
+  text-align: center;
+}
