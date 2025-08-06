@@ -76,12 +76,13 @@
 		text-align: right;
 	}
 	.circular--squareP {
-		width: 80%;
+		width: 70%;
 		height: auto;
 		border-radius: 5%;
-		max-width: 100px;  /* Optional: limits size on large screens */
+		max-width: 200px;  /* Optional: limits size on large screens */
 		display: block;
-		margin: 0 auto;    /* Optional: centers the image */
+		margin: 5% auto; /* Centers the image */
+
 	  }
 	  
 
@@ -121,15 +122,9 @@
 
 	.centered-profile {
 		text-align: center;
-	  }
-	  
-	  .circular--squareP {
-		width: 80%;
-		height: auto;
-		border-radius: 5%;
-		max-width: 300px;
-		margin: 0 auto; /* ensures image is centered horizontally */
-	  }
+		margin: 0 auto; /* Centers the profile section */
+		max-width: 300px; /* Optional: limits the width of the profile section */
+	}
 	  
 
 	/* News Section Styles */
