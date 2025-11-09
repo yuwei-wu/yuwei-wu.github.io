@@ -1183,7 +1183,7 @@ const renderTrajectories = (result) => {
     };
 
     const renderBoundaryCharts = (boundaries) => {
-      boundaryCharts.forEach((chart) => chart.destroy());
+      boundaryCharts.forEach((id) => Plotly.purge(id));
       boundaryCharts = [];
       
       const container = document.getElementById("boundary-container");
@@ -1411,7 +1411,7 @@ const renderTrajectories = (result) => {
       vectorIds.forEach((id) => {
         document.getElementById(`rand-${id}`).click();
       });
-      runSimulation();
+      setStatus("Parameters randomized. Click \"Run Simulation\" to evaluate.");
     });
 
     document.getElementById("run-simulation").addEventListener("click", () => {
