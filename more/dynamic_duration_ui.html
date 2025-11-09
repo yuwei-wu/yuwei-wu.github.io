@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trajectory Generation: Time-Optimal Boundary Value Problem</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&display=swap");
+    :root {
+      font-family: "Lato", Arial, sans-serif;
+      --macaron-blush: #a6dbf0;
+      --macaron-lilac: #ada4c4;
+      --macaron-mint: #f9e2ae;
+      --macaron-lemon: #f9e2ae;
+      --macaron-peach: #efffb6;
+      --macaron-ink: #3c2a4d;
+      --state-chart-size: 260px;
+    }
+    body {
+      font-family: "Lato", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      min-height: 100vh;
+    }
+    header {
+      background: var(--macaron-blush);
+      color: var(--macaron-ink);
+      padding: 32px;
+      margin: 5px;
+    }
+    main {
+      padding: 32px;
+      max-width: 1400px;
+      margin: auto;
+    }
+    h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+    p.subtitle {
+      margin: 6px 0 0;
+      opacity: 0.8;
+    }
+    .panel {
+      background: #fffdf9;
+      border-radius: 18px;
+      padding: 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 20px 40px rgba(60, 42, 77, 0.12);
+    }
+    .panel h2 {
+      margin-top: 0;
+      color: var(--macaron-ink);
+    }
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .grid-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .vector-card {
+      border: 1px solid rgba(60, 42, 77, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 0%;
+      background: #ffffff;
+    }
+    .limit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    .limit-card {
+      border: 1px solid rgba(60, 42, 77, 0.1);
+      border-radius: 14px;
+      padding: 15px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .limit-card label {
+      font-weight: 600;
+      color: var(--macaron-ink);
+    }
+    .limit-card input {
+      width: 30%;
+      padding: 8px;
+      border: 1px solid rgba(60, 42, 77, 0.2);
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    .limit-card small {
+      color: #64748b;
+    }
+    .vector-card header {
+      background: none;
+      color: var(--macaron-ink);
+      padding: 0;
+      margin: 12px 0;
+    }
+    .vector-card header small {
+      display: block;
+      color: #64748b;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .vector-inputs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .vector-inputs label {
+      flex: 1;
+      min-width: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .vector-inputs input {
+      width: 80%;
+      padding: 8px;
+      border: 1px solid rgba(60, 42, 77, 0.2);
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    button.randomize {
+      margin-top: 12px;
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 10px;
+      background: var(--macaron-mint);
+      color: var(--macaron-ink);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.randomize:hover {
+      background: var(--macaron-lilac);
+    }
+    .weight-control {
+      margin-top: 16px;
+    }
+    .weight-control input[type="range"] {
+      width: 100%;
+    }
+    .actions {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .actions button {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .primary {
+      background: var(--macaron-blush);
+      color: var(--macaron-ink);
+      box-shadow: 0 10px 20px rgba(244, 190, 201, 0.4);
+    }
+    .secondary {
+      background: var(--macaron-lemon);
+      color: var(--macaron-ink);
+    }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .result-card {
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--macaron-ink);
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(60, 42, 77, 0.1);
+      box-shadow: inset 0 0 0 1px rgba(60, 42, 77, 0.05);
+    }
+    .result-card h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+    #cost-chart-container {
+      position: relative;
+      width: 100%;
+      height: 420px;
+    }
+    #cost-chart {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px rgba(60, 42, 77, 0.08);
+    }
+    .traj-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .traj-meta {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 12px;
+    }
+    .traj-colorbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--macaron-ink);
+    }
+    .traj-colorbar-bar {
+      width: 140px;
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2563eb 0%, #f97316 100%);
+      border: 1px solid rgba(60, 42, 77, 0.2);
+    }
+    .plot-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 12px;
+      border: 1px solid rgba(60, 42, 77, 0.08);
+      box-shadow: 0 12px 30px rgba(60, 42, 77, 0.1);
+    }
+    .plot-card > div {
+      width: 100%;
+      height: 220px;
+    }
+    .plot-card p {
+      margin: 8px 0 0;
+      text-align: center;
+      font-weight: 600;
+      color: var(--macaron-ink);
+    }
+    .state-grid {
+      display: grid;
+      grid-template-columns: 120px repeat(3, minmax(240px, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+    .state-axis-label {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(60, 42, 77, 0.08);
+      box-shadow: 0 12px 24px rgba(60, 42, 77, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--macaron-ink);
+      text-transform: uppercase;
+    }
+    .state-plot-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .state-plot {
+      width: 100%;
+      height: var(--state-chart-size);
+    }
+    #boundary-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .boundary-summary {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(60, 42, 77, 0.12);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      color: var(--macaron-ink);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .boundary-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(60, 42, 77, 0.08);
+      box-shadow: 0 12px 30px rgba(60, 42, 77, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 360px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .boundary-plot {
+      width: 100%;
+      height: 240px;
+    }
+    .boundary-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--macaron-ink);
+      font-weight: 700;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .results {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 style="font-size:24px;">Time-Optimal Boundary Value Problem</h1>
+    <p class="subtitle">A interactive demo for time-optimal trajectory optimization with differenty dynamic limits, boundary conditions, explore weights, and preview feasibility.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Dynamic Limits</h2>
+      <div class="limit-grid">
+        <div class="limit-card">
+          <label for="limit-vmax">Max velocity v<sub>max</sub> (m/s)</label>
+          <input id="limit-vmax" type="number" min="0.1" max="10" step="0.1" value="2.0" />
+          <small>Applied for dynamic feasibility checks and boundary diagnostics.</small>
+        </div>
+        <div class="limit-card">
+          <label for="limit-amax">Max acceleration a<sub>max</sub> (m/s²)</label>
+          <input id="limit-amax" type="number" min="0.1" max="15" step="0.1" value="3.0" />
+          <small>Applied for dynamic feasibility checks and boundary diagnostics.</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Boundary Conditions</h2>
+      <div class="grid">
+        <div class="grid-row">
+          <div class="vector-card">
+          <header>
+            <strong>Start position p₀</strong>
+            <small>Range: (-3, -3, -1) → (3, 3, 3)</small>
+          </header>
+          <div class="vector-inputs">
+            <label>x<input id="p0-x" type="number" step="0.01" value="0.0" /></label>
+            <label>y<input id="p0-y" type="number" step="0.01" value="0.0" /></label>
+            <label>z<input id="p0-z" type="number" step="0.01" value="0.0" /></label>
+          </div>
+          <button class="randomize" id="rand-p0">Randomize</button>
+          </div>
+          <div class="vector-card">
+          <header>
+            <strong>Start velocity v₀</strong>
+            <small>Range: (-1, -1, -1) → (1, 1, 1)</small>
+          </header>
+          <div class="vector-inputs">
+            <label>x<input id="v0-x" type="number" step="0.01" value="0.0" /></label>
+            <label>y<input id="v0-y" type="number" step="0.01" value="0.0" /></label>
+            <label>z<input id="v0-z" type="number" step="0.01" value="0.0" /></label>
+          </div>
+          <button class="randomize" id="rand-v0">Randomize</button>
+          </div>
+          <div class="vector-card">
+          <header>
+            <strong>Start acceleration a₀</strong>
+            <small>Range: (-0.5, -0.5, -0.5) → (0.5, 0.5, 0.5)</small>
+          </header>
+          <div class="vector-inputs">
+            <label>x<input id="a0-x" type="number" step="0.01" value="0.0" /></label>
+            <label>y<input id="a0-y" type="number" step="0.01" value="0.0" /></label>
+            <label>z<input id="a0-z" type="number" step="0.01" value="0.0" /></label>
+          </div>
+          <button class="randomize" id="rand-a0">Randomize</button>
+          </div>
+        </div>
+        <div class="grid-row">
+          <div class="vector-card">
+          <header>
+            <strong>End position p₁</strong>
+            <small>Range: (-3, -3, -1) → (3, 3, 3)</small>
+          </header>
+          <div class="vector-inputs">
+            <label>x<input id="p1-x" type="number" step="0.01" value="0.0" /></label>
+            <label>y<input id="p1-y" type="number" step="0.01" value="0.0" /></label>
+            <label>z<input id="p1-z" type="number" step="0.01" value="0.0" /></label>
+          </div>
+          <button class="randomize" id="rand-p1">Randomize</button>
+          </div>
+          <div class="vector-card">
+          <header>
+            <strong>End velocity v₁</strong>
+            <small>Range: (-1, -1, -1) → (1, 1, 1)</small>
+          </header>
+          <div class="vector-inputs">
+            <label>x<input id="v1-x" type="number" step="0.01" value="0.0" /></label>
+            <label>y<input id="v1-y" type="number" step="0.01" value="0.0" /></label>
+            <label>z<input id="v1-z" type="number" step="0.01" value="0.0" /></label>
+          </div>
+          <button class="randomize" id="rand-v1">Randomize</button>
+          </div>
+          <div class="vector-card">
+          <header>
+            <strong>End acceleration a₁</strong>
+            <small>Range: (-0.5, -0.5, -0.5) → (0.5, 0.5, 0.5)</small>
+          </header>
+          <div class="vector-inputs">
+            <label>x<input id="a1-x" type="number" step="0.01" value="0.0" /></label>
+            <label>y<input id="a1-y" type="number" step="0.01" value="0.0" /></label>
+            <label>z<input id="a1-z" type="number" step="0.01" value="0.0" /></label>
+          </div>
+          <button class="randomize" id="rand-a1">Randomize</button>
+          </div>
+        </div>
+      </div>
+      <div class="weight-control">
+        <label for="weight">Duration weight λ:</label>
+        <div>
+          <input id="weight" type="range" min="0" max="100" step="1" value="50" />
+          <input id="weight-input" type="number" min="0" max="100" step="0.1" value="50" style="width:80px;margin-left:8px;" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="secondary" id="randomize-all">Randomize All</button>
+        <button class="primary" id="run-simulation">Run Simulation</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Insights</h2>
+      <div class="results">
+        <div class="result-card">
+          <h3>Feasibility Snapshot</h3>
+          <p id="feasibility-status">Press "Run Simulation" to evaluate.</p>
+        </div>
+        <div class="result-card">
+          <h3>Optimal Duration</h3>
+          <p id="optimal-duration">—</p>
+        </div>
+        <div class="result-card">
+          <h3>Max Velocity</h3>
+          <p id="max-velocity">—</p>
+        </div>
+        <div class="result-card">
+          <h3>Max Acceleration</h3>
+          <p id="max-acceleration">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Trajectories (multi-view)</h2>
+      <div class="traj-meta">
+        <div class="traj-colorbar">
+          <span>Color ∝ speed</span>
+          <div class="traj-colorbar-bar"></div>
+          <span id="traj-colorbar-max">0 → 0 m/s</span>
+        </div>
+      </div>
+      <div class="traj-grid">
+        <div class="plot-card">
+          <div id="traj-view-1"></div>
+          <p>Oblique NE</p>
+        </div>
+        <div class="plot-card">
+          <div id="traj-view-2"></div>
+          <p>Top-down XY</p>
+        </div>
+        <div class="plot-card">
+          <div id="traj-view-3"></div>
+          <p>Front XZ</p>
+        </div>
+        <div class="plot-card">
+          <div id="traj-view-4"></div>
+          <p>Side YZ</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Chosen State Profiles</h2>
+      <div class="state-grid">
+        <div class="state-axis-label">X-axis</div>
+        <div class="plot-card state-plot-card">
+          <div id="state-pos-x" class="state-plot" aria-label="Position chart x"></div>
+          <p>Position · X</p>
+        </div>
+        <div class="plot-card state-plot-card">
+          <div id="state-vel-x" class="state-plot" aria-label="Velocity chart x"></div>
+          <p>Velocity · X</p>
+        </div>
+        <div class="plot-card state-plot-card">
+          <div id="state-acc-x" class="state-plot" aria-label="Acceleration chart x"></div>
+          <p>Acceleration · X</p>
+        </div>
+        <div class="state-axis-label">Y-axis</div>
+        <div class="plot-card state-plot-card">
+          <div id="state-pos-y" class="state-plot" aria-label="Position chart y"></div>
+          <p>Position · Y</p>
+        </div>
+        <div class="plot-card state-plot-card">
+          <div id="state-vel-y" class="state-plot" aria-label="Velocity chart y"></div>
+          <p>Velocity · Y</p>
+        </div>
+        <div class="plot-card state-plot-card">
+          <div id="state-acc-y" class="state-plot" aria-label="Acceleration chart y"></div>
+          <p>Acceleration · Y</p>
+        </div>
+        <div class="state-axis-label">Z-axis</div>
+        <div class="plot-card state-plot-card">
+          <div id="state-pos-z" class="state-plot" aria-label="Position chart z"></div>
+          <p>Position · Z</p>
+        </div>
+        <div class="plot-card state-plot-card">
+          <div id="state-vel-z" class="state-plot" aria-label="Velocity chart z"></div>
+          <p>Velocity · Z</p>
+        </div>
+        <div class="plot-card state-plot-card">
+          <div id="state-acc-z" class="state-plot" aria-label="Acceleration chart z"></div>
+          <p>Acceleration · Z</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Infeasible Boundary Diagnostics</h2>
+      <div id="boundary-container"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Cost Components</h2>
+      <div id="cost-chart-container">
+        <canvas id="cost-chart" aria-label="Cost vs duration chart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    // Wait for all libraries to load
+    window.addEventListener('load', function() {
+      initializeApp();
+    });
+
+    function initializeApp() {
+    // Configuration
+    const vectors = {
+      p0: [[-3, -3, -1], [3, 3, 3]],
+      v0: [[-1, -1, -1], [1, 1, 1]],
+      a0: [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
+      p1: [[-3, -3, -1], [3, 3, 3]],
+      v1: [[-1, -1, -1], [1, 1, 1]],
+      a1: [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]]
+    };
+
+    const DURATIONS = Array.from({ length: 30 }, (_, i) => 0.5 + (9.5 * i) / 29);
+    const NUM_SAMPLES = 201;
+    const TAU = Array.from({ length: NUM_SAMPLES }, (_, i) => i / (NUM_SAMPLES - 1));
+    const DEFAULT_SOLVER_LIMITS = { vmax: 2.0, amax: 3.0 };
+    let solverConfig = { ...DEFAULT_SOLVER_LIMITS, numSamples: NUM_SAMPLES };
+    const TRAJ_VIEWS = [
+      { id: "traj-view-1", camera: { eye: { x: 1.2, y: 1.2, z: 0.9 } } },
+      { id: "traj-view-2", camera: { eye: { x: 0.01, y: 0.01, z: 2.8 }, up: { x: 0, y: 1, z: 0 }, projection: { type: "orthographic" } } },
+      { id: "traj-view-3", camera: { eye: { x: 0.01, y: 2.7, z: 0.3 }, up: { x: 0, y: 0, z: 1 }, projection: { type: "orthographic" } } },
+      { id: "traj-view-4", camera: { eye: { x: 2.7, y: 0.01, z: 0.3 }, up: { x: 0, y: 0, z: 1 }, projection: { type: "orthographic" } } }
+    ];
+    const AXES = ["x", "y", "z"];
+    const AXIS_COLORS = ["#2563eb", "#f97316", "#10b981"];
+    const COST_COLORS = ["#2563eb", "#f97316", "#0f172a"];
+    const STATE_MARKER_COLORS = { start: "#f97316", end: "#0ea5e9" };
+    const LOG_FLOOR = 1e-3;
+    const STATE_METRICS = [
+      {
+        key: "pos",
+        label: "Position",
+        field: "positions",
+        color: "#2563eb",
+        axisLimits: { x: [-3, 3], y: [-3, 3], z: [-1, 3] }
+      },
+      {
+        key: "vel",
+        label: "Velocity",
+        field: "velocities",
+        color: "#f97316",
+        axisLimits: { x: [-1, 1], y: [-1, 1], z: [-1, 1] }
+      },
+      {
+        key: "acc",
+        label: "Acceleration",
+        field: "accelerations",
+        color: "#10b981",
+        axisLimits: { x: [-0.5, 0.5], y: [-0.5, 0.5], z: [-0.5, 0.5] }
+      }
+    ];
+
+    // Global state
+    let stateCharts = [];
+    let boundaryCharts = [];
+    let costChart = null;
+    
+    const optimalLinePlugin = {
+      id: "optimalLineLabel",
+      afterDraw(chart) {
+        const opts = chart.options.plugins?.optimalLabel;
+        if (!opts) return;
+        const xScale = chart.scales.x;
+        const yScale = chart.scales.y;
+        if (!xScale || !yScale) return;
+        const x = xScale.getPixelForValue(opts.x);
+        const yValue = Math.min(yScale.max, Math.max(yScale.min, opts.y));
+        const y = yScale.getPixelForValue(yValue);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        const { top, bottom } = chart.chartArea;
+        const ctx = chart.ctx;
+        ctx.save();
+        const color = opts.color || "#0ea5e9";
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+        ctx.font = "12px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        const labelY = Math.max(top + 12, y - 8);
+        ctx.fillStyle = color;
+        ctx.fillText(opts.text, x, labelY);
+        ctx.restore();
+      }
+    };
+    
+    Chart.register(optimalLinePlugin);
+
+    // Utility functions
+    const rand = (min, max) => (Math.random() * (max - min) + min).toFixed(2);
+
+    const readVector = (id) =>
+      ["x", "y", "z"].map((axis) => {
+        const value = parseFloat(document.getElementById(`${id}-${axis}`).value);
+        return Number.isFinite(value) ? value : 0;
+      });
+
+    const setStatus = (message) => {
+      document.getElementById("feasibility-status").textContent = message;
+    };
+
+    const setOptimalDuration = (value) => {
+      document.getElementById("optimal-duration").textContent = value;
+    };
+
+    const setMaxVelocity = (value) => {
+      document.getElementById("max-velocity").textContent = value;
+    };
+
+    const setMaxAcceleration = (value) => {
+      document.getElementById("max-acceleration").textContent = value;
+    };
+    
+    const ensureLogSafe = (value) => (value > LOG_FLOOR ? value : LOG_FLOOR);
+    const readPositiveLimit = (input, fallback) => {
+      const value = parseFloat(input.value);
+      if (Number.isFinite(value) && value > 0) {
+        return value;
+      }
+      input.value = fallback;
+      return fallback;
+    };
+
+    // Mathematical functions
+    const combineVector = (coeffs, vectors) => {
+      const res = [0, 0, 0];
+      for (let i = 0; i < vectors.length; i++) {
+        res[0] += coeffs[i] * vectors[i][0];
+        res[1] += coeffs[i] * vectors[i][1];
+        res[2] += coeffs[i] * vectors[i][2];
+      }
+      return res;
+    };
+
+    const hermiteScalars = (tau) => {
+      const t2 = tau * tau;
+      const t3 = t2 * tau;
+      const t4 = t2 * t2;
+      const t5 = t4 * tau;
+      return {
+        h00: 1 - 10 * t3 + 15 * t4 - 6 * t5,
+        h01: 10 * t3 - 15 * t4 + 6 * t5,
+        h10: tau - 6 * t3 + 8 * t4 - 3 * t5,
+        h11: -4 * t3 + 7 * t4 - 3 * t5,
+        h20: 0.5 * t2 - 1.5 * t3 + 1.5 * t4 - 0.5 * t5,
+        h21: 0.5 * t3 - t4 + 0.5 * t5
+      };
+    };
+
+    const hermiteDeriv1 = (tau) => {
+      const t2 = tau * tau;
+      const t3 = t2 * tau;
+      const t4 = t2 * t2;
+      return {
+        dh00: -30 * t2 + 60 * t3 - 30 * t4,
+        dh01: 30 * t2 - 60 * t3 + 30 * t4,
+        dh10: 1 - 18 * t2 + 32 * t3 - 15 * t4,
+        dh11: -12 * t2 + 28 * t3 - 15 * t4,
+        dh20: tau - 4.5 * t2 + 6 * t3 - 2.5 * t4,
+        dh21: 1.5 * t2 - 4 * t3 + 2.5 * t4
+      };
+    };
+
+    const hermiteDeriv2 = (tau) => {
+      const t = tau;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      return {
+        d2h00: -60 * t + 180 * t2 - 120 * t3,
+        d2h01: 60 * t - 180 * t2 + 120 * t3,
+        d2h10: -36 * t + 96 * t2 - 60 * t3,
+        d2h11: -24 * t + 84 * t2 - 60 * t3,
+        d2h20: 1 - 9 * t + 18 * t2 - 10 * t3,
+        d2h21: 3 * t - 12 * t2 + 10 * t3
+      };
+    };
+
+    const hermiteDeriv3 = (tau) => {
+      const t = tau;
+      const t2 = t * t;
+      return {
+        d3h00: -60 + 360 * t - 360 * t2,
+        d3h01: 60 - 360 * t + 360 * t2,
+        d3h10: -36 + 192 * t - 180 * t2,
+        d3h11: -24 + 168 * t - 180 * t2,
+        d3h20: -9 + 36 * t - 30 * t2,
+        d3h21: 3 - 24 * t + 30 * t2
+      };
+    };
+
+    const evaluateDuration = (dt, spec, cfg) => {
+      const baseVecs = [spec.p0, spec.p1, spec.v0, spec.v1, spec.a0, spec.a1];
+      const dt2 = dt * dt;
+      const dt3 = dt2 * dt;
+      const positions = [];
+      const velocities = [];
+      const accelerations = [];
+      const speeds = [];
+      const times = [];
+      const jerkSquares = [];
+      let maxVel = 0;
+      let maxAcc = 0;
+
+      for (let i = 0; i < TAU.length; i++) {
+        const tau = TAU[i];
+        const time = tau * dt;
+        times.push(time);
+
+        const scalars = hermiteScalars(tau);
+        const coeffsPos = [
+          scalars.h00, scalars.h01,
+          scalars.h10 * dt, scalars.h11 * dt,
+          scalars.h20 * dt2, scalars.h21 * dt2
+        ];
+        const pos = combineVector(coeffsPos, baseVecs);
+        positions.push(pos);
+
+        const d1 = hermiteDeriv1(tau);
+        const coeffsVel = [
+          d1.dh00, d1.dh01,
+          d1.dh10 * dt, d1.dh11 * dt,
+          d1.dh20 * dt2, d1.dh21 * dt2
+        ];
+        const velTau = combineVector(coeffsVel, baseVecs);
+        const vel = velTau.map((v) => v / dt);
+        velocities.push(vel);
+        const speed = Math.hypot(vel[0], vel[1], vel[2]);
+        speeds.push(speed);
+        maxVel = Math.max(maxVel, Math.abs(vel[0]), Math.abs(vel[1]), Math.abs(vel[2]));
+
+        const d2 = hermiteDeriv2(tau);
+        const coeffsAcc = [
+          d2.d2h00, d2.d2h01,
+          d2.d2h10 * dt, d2.d2h11 * dt,
+          d2.d2h20 * dt2, d2.d2h21 * dt2
+        ];
+        const accTau = combineVector(coeffsAcc, baseVecs);
+        const acc = accTau.map((v) => v / dt2);
+        accelerations.push(acc);
+        maxAcc = Math.max(maxAcc, Math.abs(acc[0]), Math.abs(acc[1]), Math.abs(acc[2]));
+
+        const d3 = hermiteDeriv3(tau);
+        const coeffsJerk = [
+          d3.d3h00, d3.d3h01,
+          d3.d3h10 * dt, d3.d3h11 * dt,
+          d3.d3h20 * dt2, d3.d3h21 * dt2
+        ];
+        const jerkTau = combineVector(coeffsJerk, baseVecs);
+        const jerk = jerkTau.map((v) => v / dt3);
+        const jerkSq = jerk[0] * jerk[0] + jerk[1] * jerk[1] + jerk[2] * jerk[2];
+        jerkSquares.push(jerkSq);
+      }
+
+      let jerkCost = 0;
+      for (let i = 1; i < times.length; i++) {
+        const dtStep = times[i] - times[i - 1];
+        jerkCost += 0.5 * (jerkSquares[i - 1] + jerkSquares[i]) * dtStep;
+      }
+
+      const feasible = maxVel <= cfg.vmax + 1e-6 && maxAcc <= cfg.amax + 1e-6;
+      return {
+        dt, positions, velocities, accelerations, speeds, times,
+        jerkCost, feasible, maxVel, maxAcc
+      };
+    };
+
+    const solveDemo = (spec, weight) => {
+      const results = DURATIONS.map((dt) => evaluateDuration(dt, spec, solverConfig));
+      const jerkCosts = results.map((r) => r.jerkCost);
+      const durationTerms = DURATIONS.map((dt) => weight * dt);
+      const compositeCosts = jerkCosts.map((jc, idx) => jc + durationTerms[idx]);
+      
+      results.forEach((res, idx) => {
+        res.compositeCost = compositeCosts[idx];
+      });
+
+      const feasibility = results.map((r) => r.feasible);
+      const feasibleRecords = results.filter((r) => r.feasible);
+      
+      let chosen = null;
+      let bounds = { min: null, max: null };
+      
+      if (feasibleRecords.length) {
+        chosen = feasibleRecords.reduce((best, curr) =>
+          curr.compositeCost < best.compositeCost ? curr : best
+        );
+        bounds = {
+          min: Math.min(...feasibleRecords.map((r) => r.dt)),
+          max: Math.max(...feasibleRecords.map((r) => r.dt))
+        };
+      } else {
+        chosen = results.reduce((best, curr) =>
+          curr.compositeCost < best.compositeCost ? curr : best
+        );
+      }
+
+      const firstFeasibleIdx = results.findIndex((r) => r.feasible);
+      const lastFeasibleIdx = results.map((r) => r.feasible).lastIndexOf(true);
+      
+      let lowerEntry = null;
+      let upperEntry = null;
+      if (firstFeasibleIdx > 0) {
+        lowerEntry = results[firstFeasibleIdx - 1];
+      }
+      if (lastFeasibleIdx !== -1 && lastFeasibleIdx < results.length - 1) {
+        upperEntry = results[lastFeasibleIdx + 1];
+      }
+
+      const trajectories = results;
+      const axisMins = [-10, -10, -10];
+      const axisMaxs = [10, 10, 10];
+      
+      trajectories.forEach((res) => {
+        res.positions.forEach((pos) => {
+          for (let k = 0; k < 3; k++) {
+            axisMins[k] = Math.min(axisMins[k], pos[k]);
+            axisMaxs[k] = Math.max(axisMaxs[k], pos[k]);
+          }
+        });
+      });
+      
+
+      const margins = axisMins.map((minVal, idx) => {
+        const span = axisMaxs[idx] - minVal;
+        return span > 0 ? span * 0.2 : 0.5;
+      });
+      
+      const axisLimits = axisMins.map((minVal, idx) => 
+        [minVal - margins[idx], axisMaxs[idx] + margins[idx]]
+      );
+
+      return {
+        durations: DURATIONS,
+        jerkCosts,
+        durationTerms,
+        compositeCosts,
+        feasibility,
+        chosenDt: chosen.dt,
+        feasibleBounds: bounds,
+        trajectories,
+        axisLimits,
+        chosenState: {
+          times: chosen.times,
+          positions: chosen.positions,
+          velocities: chosen.velocities,
+          accelerations: chosen.accelerations,
+          maxVel: chosen.maxVel,
+          maxAcc: chosen.maxAcc
+        },
+        boundaries: [
+          lowerEntry && { label: "Lower", entry: lowerEntry },
+          upperEntry && { label: "Upper", entry: upperEntry }
+        ].filter(Boolean),
+        chosenCost: chosen.compositeCost
+      };
+    };
+
+    // Rendering functions
+    const renderCostChart = (result) => {
+      if (!costChart) return;
+      const mapPoints = (values) =>
+        result.durations.map((dt, idx) => ({
+          x: dt,
+          y: ensureLogSafe(values[idx]),
+          feasible: result.feasibility[idx]
+        }));
+      costChart.data.labels = [];
+      const mappedJerk = mapPoints(result.jerkCosts);
+      const mappedDuration = mapPoints(result.durationTerms);
+      const mappedComposite = mapPoints(result.compositeCosts);
+      const applyPointHighlight = (dataset, mappedValues) => {
+        dataset.data = mappedValues;
+        dataset.actualValues = mappedValues.map((pt) => pt.y);
+        dataset.pointRadius = (ctx) => (ctx.raw ? 3 : 0);
+        dataset.pointHoverRadius = (ctx) => (ctx.raw ? 4.5 : 0);
+        dataset.pointBackgroundColor = (ctx) =>
+          ctx.raw && !ctx.raw.feasible ? "#dc2626" : dataset.borderColor;
+        dataset.pointBorderColor = (ctx) =>
+          ctx.raw && !ctx.raw.feasible ? "#dc2626" : dataset.borderColor;
+      };
+      applyPointHighlight(costChart.data.datasets[0], mappedJerk);
+      applyPointHighlight(costChart.data.datasets[1], mappedDuration);
+      applyPointHighlight(costChart.data.datasets[2], mappedComposite);
+      costChart.options.plugins.optimalLabel = {
+        x: result.chosenDt,
+        y: ensureLogSafe(result.chosenCost),
+        text: `Optimal cost = ${result.chosenCost.toFixed(2)}`,
+        color: "#10b981"
+      };
+      costChart.update();
+    };
+
+
+
+    const deg = (d) => (d * Math.PI) / 180;
+
+// Simple iso-ish projection: rotate Z then X, keep (x', y')
+function projectIsometric([x, y, z], thetaZ = 45, thetaX = 35.264) {
+  const cz = Math.cos(deg(thetaZ)), sz = Math.sin(deg(thetaZ));
+  const cx = Math.cos(deg(thetaX)), sx = Math.sin(deg(thetaX));
+  // Rz
+  const xr =  cz * x - sz * y;
+  const yr =  sz * x + cz * y;
+  const zr =  z;
+  // Rx
+  const x2 = xr;
+  const y2 =  cx * yr - sx * zr;
+  // (z2 not used) const z2 = sx * yr + cx * zr;
+  return [x2, y2];
+}
+
+function colorFromRatio(t) {
+  const clamp = Math.max(0, Math.min(1, t));
+  const start = [37, 99, 235];
+  const end = [249, 115, 22];
+  const lerp = (a, b) => Math.round(a + (b - a) * clamp);
+  return `rgb(${lerp(start[0], end[0])}, ${lerp(start[1], end[1])}, ${lerp(start[2], end[2])})`;
+}
+
+function mk2DTraces(result, i, j, colorFn) {
+  return result.trajectories.map((res) => ({
+    x: res.positions.map((p) => p[i]),
+    y: res.positions.map((p) => p[j]),
+    mode: "lines",
+    type: "scatter",
+    line: { color: colorFn(res), width: res.feasible ? 2 : 1 },
+    opacity: res.feasible ? 0.95 : 0.45,
+    hoverinfo: "skip",
+    showlegend: false
+  }));
+}
+
+function mkIsoTracesAndRange(result, colorFn) {
+  const traces = [];
+  let uMin =  Infinity, uMax = -Infinity, vMin =  Infinity, vMax = -Infinity;
+  result.trajectories.forEach((res) => {
+    const u = [], v = [];
+    res.positions.forEach((p) => {
+      const [uu, vv] = projectIsometric(p);
+      u.push(uu); v.push(vv);
+      uMin = Math.min(uMin, uu); uMax = Math.max(uMax, uu);
+      vMin = Math.min(vMin, vv); vMax = Math.max(vMax, vv);
+    });
+    traces.push({
+      x: u, y: v, mode: "lines", type: "scatter",
+      line: { color: colorFn(res), width: res.feasible ? 2 : 1 },
+      opacity: res.feasible ? 0.95 : 0.45,
+      hoverinfo: "skip", showlegend: false
+    });
+  });
+  const padU = (uMax - uMin || 1) * 0.1;
+  const padV = (vMax - vMin || 1) * 0.1;
+  return { traces, rangeU: [uMin - padU, uMax + padU], rangeV: [vMin - padV, vMax + padV] };
+}
+
+function common2DLayout(xTitle, yTitle, xRange, yRange) {
+  return {
+    margin: { l: 40, r: 10, t: 10, b: 40 },
+    xaxis: { title: xTitle, range: xRange },
+    yaxis: { title: yTitle, range: yRange, scaleanchor: "x", scaleratio: 1 }, // lock 1:1
+  };
+}
+
+const renderTrajectories = (result) => {
+  // Helper: find per-axis limits from trajectory positions
+  const findRange = (axisIndex) => {
+    let min = Infinity, max = -Infinity;
+    result.trajectories.forEach((res) => {
+      res.positions.forEach((p) => {
+        const v = p[axisIndex];
+        if (v < min) min = v;
+        if (v > max) max = v;
+      });
+    });
+    if (!isFinite(min) || !isFinite(max)) {
+      min = -1; max = 1;
+    }
+    const pad = (max - min || 1) * 0.1;
+    return [min - pad, max + pad];
+  };
+
+  const xRange = findRange(0);
+  const yRange = findRange(1);
+  const zRange = findRange(2);
+  const maxSpeed = Math.max(
+    1e-3,
+    ...result.trajectories.map((res) => Math.max(...(res.speeds || [0])))
+  );
+  const colorFn = (res) => {
+    const resMax = Math.max(...(res.speeds || [0]));
+    return colorFromRatio(resMax / maxSpeed);
+  };
+  const colorbarMaxEl = document.getElementById("traj-colorbar-max");
+  if (colorbarMaxEl) {
+    colorbarMaxEl.textContent = `0 → ${maxSpeed.toFixed(2)} m/s`;
+  }
+
+  // --- View 1: Oblique (software isometric projection) ---
+  const iso = mkIsoTracesAndRange(result, colorFn);
+  Plotly.newPlot(
+    "traj-view-1",
+    iso.traces,
+    common2DLayout("u (iso)", "v (iso)", iso.rangeU, iso.rangeV),
+    { displayModeBar: false }
+  );
+
+  // --- View 2: Top-down XY ---
+  Plotly.newPlot(
+    "traj-view-2",
+    mk2DTraces(result, 0, 1, colorFn),
+    common2DLayout("x", "y", xRange, yRange),
+    { displayModeBar: false }
+  );
+
+  // --- View 3: Front XZ ---
+  Plotly.newPlot(
+    "traj-view-3",
+    mk2DTraces(result, 0, 2, colorFn),
+    common2DLayout("x", "z", xRange, zRange),
+    { displayModeBar: false }
+  );
+
+  // --- View 4: Side YZ ---
+  Plotly.newPlot(
+    "traj-view-4",
+    mk2DTraces(result, 1, 2, colorFn),
+    common2DLayout("y", "z", yRange, zRange),
+    { displayModeBar: false }
+  );
+};
+
+    const renderStateCharts = (state) => {
+      stateCharts.forEach((id) => Plotly.purge(id));
+      stateCharts = [];
+      
+      const times = state.times.map((t) => parseFloat(t.toFixed(2)));
+      const timeStart = times[0];
+      const timeEnd = times[times.length - 1];
+      const chartHeight =
+        parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue("--state-chart-size")
+        ) || 260;
+      
+      STATE_METRICS.forEach((metric) => {
+        AXES.forEach((axis, axisIndex) => {
+          const containerId = `state-${metric.key}-${axis}`;
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          
+          const limits = metric.axisLimits?.[axis];
+          const rawValues = state[metric.field].map((values) => values[axisIndex]);
+          const dataMin = Math.min(...rawValues);
+          const dataMax = Math.max(...rawValues);
+          const span = Math.max(dataMax - dataMin, 1e-3);
+          const pad = span * 0.1;
+          let yMin = dataMin - pad;
+          let yMax = dataMax + pad;
+          if (Array.isArray(limits) && limits.length === 2) {
+            yMin = Math.min(limits[0], yMin);
+            yMax = Math.max(limits[1], yMax);
+          }
+          const clamp = (val) => Math.max(yMin, Math.min(yMax, val));
+          
+          const series = rawValues.map(clamp);
+          const startValue = clamp(rawValues[0]);
+          const endValue = clamp(rawValues[rawValues.length - 1]);
+          
+          const traces = [
+            {
+              x: times,
+              y: series,
+              name: `${metric.label} (${axis})`,
+              mode: "lines",
+              line: { color: metric.color, width: 2 },
+              hovertemplate: "t=%{x:.2f}<br>value=%{y:.2f}<extra></extra>"
+            },
+            {
+              x: [timeStart],
+              y: [startValue],
+              name: "Start",
+              mode: "markers",
+              marker: { color: STATE_MARKER_COLORS.start, size: 8 },
+              hovertemplate: "Start=%{y:.2f}<extra></extra>"
+            },
+            {
+              x: [timeEnd],
+              y: [endValue],
+              name: "End",
+              mode: "markers",
+              marker: { color: STATE_MARKER_COLORS.end, size: 8 },
+              hovertemplate: "End=%{y:.2f}<extra></extra>"
+            }
+          ];
+          
+          const layout = {
+            margin: { l: 40, r: 10, t: 36, b: 40 },
+            legend: { orientation: "h", y: -0.3 },
+            title: { text: `${metric.label} · ${axis.toUpperCase()}(t)` },
+            xaxis: { title: "t (s)", range: [timeStart, timeEnd] },
+            yaxis: {
+              title: `${axis}(t)`,
+              range: [yMin, yMax]
+            },
+            height: chartHeight
+          };
+          
+          Plotly.newPlot(container, traces, layout, { displayModeBar: false });
+          stateCharts.push(containerId);
+        });
+      });
+    };
+
+    const renderBoundaryCharts = (boundaries) => {
+      boundaryCharts.forEach((chart) => chart.destroy());
+      boundaryCharts = [];
+      
+      const container = document.getElementById("boundary-container");
+      container.innerHTML = "";
+      
+      if (!boundaries.length) {
+        container.innerHTML = "<p style='padding:20px;text-align:center;'>No adjacent infeasible segments around the feasible window.</p>";
+        return;
+      }
+      
+      boundaries.forEach((boundary) => {
+        const summaryCard = document.createElement("div");
+        summaryCard.className = "boundary-summary";
+        summaryCard.innerHTML = `
+          <strong>${boundary.label} boundary</strong>
+          <span>Δt = ${boundary.entry.dt.toFixed(2)} s</span>
+          <span>max|v| = ${boundary.entry.maxVel.toFixed(2)} m/s</span>
+          <span>max|a| = ${boundary.entry.maxAcc.toFixed(2)} m/s²</span>
+        `;
+        container.appendChild(summaryCard);
+        
+        const grid = document.createElement("div");
+        grid.className = "boundary-grid";
+        container.appendChild(grid);
+        
+        AXES.forEach((axis, axisIndex) => {
+          const card = document.createElement("div");
+          card.className = "boundary-card";
+          
+          const plotDiv = document.createElement("div");
+          plotDiv.className = "boundary-plot";
+          const velPlotId = `boundary-${boundary.label}-v-${axis}-${Math.random().toString(36).slice(2)}`;
+          plotDiv.id = velPlotId;
+
+          card.appendChild(plotDiv);
+
+          const accelDiv = document.createElement("div");
+          accelDiv.className = "boundary-plot";
+          const accelPlotId = `boundary-${boundary.label}-a-${axis}-${Math.random().toString(36).slice(2)}`;
+          accelDiv.id = accelPlotId;
+          card.appendChild(accelDiv);
+          
+          grid.appendChild(card);
+          
+          const times = boundary.entry.times.map((t) => parseFloat(t.toFixed(2)));
+          const velocities = boundary.entry.velocities.map((v) => v[axisIndex]);
+          const accelerations = boundary.entry.accelerations.map((a) => a[axisIndex]);
+          const infeasibleMask = boundary.entry.infeasibleMask || [];
+          
+          const buildLineTraces = (values, limit, label) => {
+            const segments = [];
+            let currentSegment = { x: [], y: [], infeasible: false };
+            values.forEach((val, idx) => {
+              const infeasible = !!infeasibleMask[idx];
+              if (
+                idx > 0 &&
+                currentSegment.infeasible !== infeasible
+              ) {
+                if (currentSegment.x.length) segments.push(currentSegment);
+                currentSegment = { x: [times[idx - 1]], y: [values[idx - 1]], infeasible };
+              }
+              currentSegment.infeasible = infeasible;
+              currentSegment.x.push(times[idx]);
+              currentSegment.y.push(val);
+            });
+            if (currentSegment.x.length) segments.push(currentSegment);
+            
+            const traces = segments.map((seg) => ({
+              x: seg.x,
+              y: seg.y,
+              name: label,
+              mode: "lines",
+              line: {
+                color: seg.infeasible ? "#dc2626" : AXIS_COLORS[axisIndex],
+                width: seg.infeasible ? 3 : 2
+              },
+              hovertemplate: seg.infeasible
+                ? "Infeasible<br>t=%{x:.2f}<br>value=%{y:.2f}<extra></extra>"
+                : "t=%{x:.2f}<br>value=%{y:.2f}<extra></extra>"
+            }));
+            
+            traces.push(
+              {
+                x: [times[0], times[times.length - 1]],
+                y: [limit, limit],
+                name: `+${label}`,
+                mode: "lines",
+                line: { color: "#a1a1aa", dash: "dash" },
+                hoverinfo: "skip"
+              },
+              {
+                x: [times[0], times[times.length - 1]],
+                y: [-limit, -limit],
+                name: `-${label}`,
+                mode: "lines",
+                line: { color: "#a1a1aa", dash: "dash" },
+                hoverinfo: "skip"
+              }
+            );
+            return traces;
+          };
+          
+          const velocityTraces = buildLineTraces(velocities, solverConfig.vmax, `v_${axis}`);
+          const accelTraces = buildLineTraces(accelerations, solverConfig.amax, `a_${axis}`);
+          
+          const velocityLayout = {
+            margin: { l: 40, r: 10, t: 30, b: 40 },
+            title: { text: `Velocity · ${axis.toUpperCase()}(t)` },
+            xaxis: { title: "t (s)" },
+            yaxis: { title: `${axis}(t)` },
+            height: 260,
+            legend: { orientation: "h", y: -0.3 }
+          };
+
+          const accelLayout = {
+            margin: { l: 40, r: 10, t: 30, b: 40 },
+            title: { text: `Acceleration · ${axis.toUpperCase()}(t)` },
+            xaxis: { title: "t (s)" },
+            yaxis: { title: `${axis}(t)` },
+            height: 260,
+            legend: { orientation: "h", y: -0.3 }
+          };
+          
+          Plotly.newPlot(velPlotId, velocityTraces, velocityLayout, { displayModeBar: false });
+          Plotly.newPlot(accelPlotId, accelTraces, accelLayout, { displayModeBar: false });
+          boundaryCharts.push(velPlotId, accelPlotId);
+        });
+      });
+    };
+
+    // Main simulation function
+    function runSimulation() {
+      setStatus("Running simulation…");
+      setOptimalDuration("—");
+      setMaxVelocity("—");
+      setMaxAcceleration("—");
+      
+      try {
+        const spec = {
+          p0: readVector("p0"),
+          v0: readVector("v0"),
+          a0: readVector("a0"),
+          p1: readVector("p1"),
+          v1: readVector("v1"),
+          a1: readVector("a1")
+        };
+        
+        const weight = parseFloat(document.getElementById("weight").value);
+        const result = solveDemo(spec, weight);
+        
+        if (result.feasibleBounds.min != null) {
+          setStatus(
+            `Feasible window: Δt in [${result.feasibleBounds.min.toFixed(2)}, ${result.feasibleBounds.max.toFixed(2)}]`
+          );
+        } else {
+          setStatus("No feasible durations found.");
+        }
+        
+        setOptimalDuration(`${result.chosenDt.toFixed(2)} s`);
+        setMaxVelocity(`${result.chosenState.maxVel.toFixed(2)} m/s`);
+        setMaxAcceleration(`${result.chosenState.maxAcc.toFixed(2)} m/s²`);
+        
+        renderCostChart(result);
+        renderTrajectories(result);
+        renderStateCharts(result.chosenState);
+        renderBoundaryCharts(result.boundaries);
+      } catch (err) {
+        console.error(err);
+        setStatus(err.message || "Simulation failed.");
+      }
+    }
+
+    // Event listeners
+    const limitVmaxInput = document.getElementById("limit-vmax");
+    const limitAmaxInput = document.getElementById("limit-amax");
+    
+    const syncLimits = (triggerRun = false) => {
+      const vmax = readPositiveLimit(limitVmaxInput, solverConfig.vmax || DEFAULT_SOLVER_LIMITS.vmax);
+      const amax = readPositiveLimit(limitAmaxInput, solverConfig.amax || DEFAULT_SOLVER_LIMITS.amax);
+      solverConfig = { ...solverConfig, vmax, amax };
+      if (triggerRun) {
+        runSimulation();
+      }
+    };
+    
+    limitVmaxInput.addEventListener("input", () => syncLimits(true));
+    limitAmaxInput.addEventListener("input", () => syncLimits(true));
+    
+    const weightSlider = document.getElementById("weight");
+    const weightInput = document.getElementById("weight-input");
+
+    const syncWeight = (value, triggerRun = false) => {
+      const clamped = Math.max(0, Math.min(100, value));
+      weightSlider.value = clamped;
+      weightInput.value = clamped.toFixed(1);
+      if (triggerRun) {
+        runSimulation();
+      }
+      return clamped;
+    };
+
+    weightSlider.addEventListener("input", () => {
+      syncWeight(parseFloat(weightSlider.value), true);
+    });
+    
+    weightInput.addEventListener("input", () => {
+      const val = parseFloat(weightInput.value);
+      if (!Number.isFinite(val)) return;
+      syncWeight(val, true);
+    });
+
+    const vectorIds = Object.keys(vectors);
+    
+    vectorIds.forEach((id) => {
+      document.getElementById(`rand-${id}`).addEventListener("click", () => {
+        ["x", "y", "z"].forEach((axis, idx) => {
+          const input = document.getElementById(`${id}-${axis}`);
+          const [min, max] = vectors[id];
+          input.value = rand(min[idx], max[idx]);
+        });
+      });
+    });
+
+    document.getElementById("randomize-all").addEventListener("click", () => {
+      vectorIds.forEach((id) => {
+        document.getElementById(`rand-${id}`).click();
+      });
+      runSimulation();
+    });
+
+    document.getElementById("run-simulation").addEventListener("click", () => {
+      runSimulation();
+    });
+
+    // Initialize cost chart
+    const costCtx = document.getElementById("cost-chart").getContext("2d");
+    costChart = new Chart(costCtx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: "Jerk cost",
+            borderColor: COST_COLORS[0],
+            backgroundColor: "rgba(37, 99, 235, 0.15)",
+            fill: true,
+            tension: 0.25,
+            data: []
+          },
+          {
+            label: "Duration penalty",
+            borderColor: COST_COLORS[1],
+            backgroundColor: "rgba(249, 115, 22, 0.15)",
+            fill: true,
+            tension: 0.25,
+            data: []
+          },
+          {
+            label: "Composite cost",
+            borderColor: COST_COLORS[2],
+            backgroundColor: "rgba(15, 23, 42, 0.1)",
+            fill: false,
+            tension: 0.25,
+            data: []
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const dataset = context.dataset;
+                const actualValues = dataset.actualValues || [];
+                const actual = actualValues[context.dataIndex] ?? context.parsed.y;
+                return `${dataset.label}: ${actual.toFixed(2)}`;
+              }
+            }
+          },
+          optimalLabel: null
+        },
+        scales: {
+          y: {
+            type: 'logarithmic',
+            min: LOG_FLOOR,
+            title: { display: true, text: "Cost" },
+            ticks: {
+              callback: function(value) {
+                if (value >= 1000) return value.toExponential(1);
+                if (value >= 1) return value.toFixed(0);
+                return value.toPrecision(1);
+              }
+            }
+          },
+          x: { 
+            type: 'linear',
+            title: { display: true, text: "Duration Δt (s)" },
+            ticks: {
+              callback: function(value) {
+                return Number(value).toFixed(1);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Initialize with random values and run simulation
+    syncLimits();
+    syncWeight(50);
+    document.getElementById("randomize-all").click();
+    }
+  </script>
+
+  <footer style="text-align:center;padding:16px 0;">
+    <p style="margin:0;">© 2025 Yuwei Wu | With the assistance of GPT</p>
+  </footer>
+</body>
+</html>
