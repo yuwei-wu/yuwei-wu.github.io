@@ -5,7 +5,7 @@
   <title>Trajectory Generation: Time-Optimal Boundary Value Problem</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Interactive demo for time-optimal boundary value problems: tweak boundary conditions, explore trajectories, and inspect infeasible diagnostics." />
-  <meta property="og:title" content="Trajectory Generation: Time-Optimal Boundary Value Problem" />
+  <meta property="og:title" content="Motion Planning - Time-Optimal Boundary Value Problem" />
   <meta property="og:description" content="Design and analyze trajectories with multi-view plots, state profiles, and infeasible boundary diagnostics." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://example.com/bvp-demo" />
@@ -327,9 +327,81 @@
       font-weight: 700;
       text-align: center;
     }
+    @media (max-width: 1024px) {
+      main {
+        padding: 24px;
+      }
+      .panel {
+        padding: 24px;
+      }
+      .state-grid {
+        grid-template-columns: 100px repeat(2, minmax(200px, 1fr));
+      }
+    }
+
     @media (max-width: 768px) {
-      .results {
+      header {
+        padding: 16px 20px;
+      }
+
+      main {
+        padding: 18px 16px;
+      }
+
+      .panel {
+        padding: 20px;
+      }
+
+      .limit-grid,
+      .grid-row,
+      .results,
+      .traj-grid,
+      .boundary-grid {
         grid-template-columns: 1fr;
+      }
+
+      .state-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .state-axis-label {
+        flex-direction: row;
+        min-height: 48px;
+      }
+
+      .vector-inputs label,
+      .limit-card input {
+        width: 100%;
+      }
+
+      .limit-card input {
+        max-width: none;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .boundary-summary {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 576px) {
+      h1 {
+        font-size: 20px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .vector-card,
+      .result-card,
+      .plot-card,
+      .boundary-card {
+        padding: 14px;
       }
     }
   </style>

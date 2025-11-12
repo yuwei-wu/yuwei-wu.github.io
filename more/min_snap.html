@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minimum Snap Trajectory - Interactive 3D Demo</title>
-    <meta name="description" content="Interactive 3D demo for minimum snap trajectory generation: adjust waypoints, visualize smooth trajectories, and explore optimal path planning." />
-    <meta property="og:title" content="Minimum Snap Trajectory - Interactive 3D Demo" />
-    <meta property="og:description" content="Design and visualize smooth minimum snap trajectories with interactive 3D waypoint manipulation." />
+    <meta name="description" content="Interactive 3D demo for minimum snap trajectory generation: adjust waypoints, visualize smooth trajectories, and explore optimal trajectory planning." />
+    <meta property="og:title" content="Motion Planning - 3D Minimum Snap Trajectory Optimization" />
+    <meta property="og:description" content="Design and visualize smooth minimum snap trajectories for interactive 3D waypoint traversal." />
     <meta property="og:type" content="website" />
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&display=swap");
@@ -479,6 +479,68 @@
 
         footer.site-footer p {
             margin: 0;
+        }
+
+        @media (max-width: 1024px) {
+            :root {
+                --side-panel-width: 300px;
+            }
+            #controls {
+                max-width: 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                overflow: auto;
+            }
+
+            #canvas-wrapper {
+                min-height: 55vh;
+            }
+
+            #container {
+                height: 55vh;
+            }
+
+            #controls,
+            #charts-panel,
+            #info {
+                position: static;
+                width: 100%;
+                max-width: none;
+                margin: 16px auto;
+                left: auto;
+                right: auto;
+                top: auto;
+                bottom: auto;
+            }
+
+            #controls {
+                min-width: unset;
+                max-height: none;
+                padding: 18px;
+                background: var(--color-panel-bg);
+                backdrop-filter: none;
+            }
+
+            #charts-panel {
+                padding-left: 0;
+            }
+
+            #info {
+                width: 100%;
+                margin-bottom: 32px;
+            }
+
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
