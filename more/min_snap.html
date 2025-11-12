@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Snap Trajectory - Interactive 3D Demo</title>
+    <meta name="description" content="Interactive 3D demo for minimum snap trajectory generation: adjust waypoints, visualize smooth trajectories, and explore optimal path planning." />
+    <meta property="og:title" content="Minimum Snap Trajectory - Interactive 3D Demo" />
+    <meta property="og:description" content="Design and visualize smooth minimum snap trajectories with interactive 3D waypoint manipulation." />
+    <meta property="og:type" content="website" />
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&display=swap");
+        :root {
+            font-family: "Lato", Arial, sans-serif;
+            /* UI color palette */
+            --color-bg: #f8fbff; /* App background */
+            --color-panel-bg: #fffdf9; /* Solid panel fill */
+            --color-panel-bg-alpha: rgba(255, 253, 249, 0.6); /* Translucent panel fill */
+            --color-panel-border: rgba(60, 42, 77, 0.08); /* Panel border */
+            --color-panel-shadow: rgba(60, 42, 77, 0.12); /* Panel drop shadow */
+            --color-panel-shadow-soft: rgba(60, 42, 77, 0.06); /* Card drop shadow */
+            --color-primary: #3c2a4d; /* Primary text */
+            --color-secondary: #64748b; /* Secondary text */
+            --color-tertiary: #495057; /* Accent headings */
+            --color-white: #ffffff; /* White surface */
+            --color-white-soft: rgba(255, 255, 255, 0.6); /* Soft white overlay */
+            --color-footer: rgba(255, 255, 255, 0.6); /* Footer text */
+            --color-info-bg: rgba(60, 42, 77, 0.95); /* Status card background */
+            --color-info-border: rgba(255, 255, 255, 0.1); /* Status card border */
+            --color-status-ready: #10b981; /* Ready badge */
+            --color-button-primary: #a6dbf0; /* Primary button */
+            --color-button-secondary: #f9e2ae; /* Secondary button */
+            --color-button-hover: #ada4c4; /* Button hover */
+            --color-button-danger: #ef4444; /* Remove button */
+            --color-button-danger-hover: #dc2626; /* Remove hover */
+            --color-scroll-track: rgba(60, 42, 77, 0.05); /* Scroll track */
+            --color-scroll-thumb: #ada4c4; /* Scroll thumb */
+            --color-scroll-thumb-hover: #a6dbf0; /* Scroll thumb hover */
+            --shadow-accent: rgba(166, 219, 240, 0.3); /* Primary shadow */
+            --shadow-accent-strong: rgba(166, 219, 240, 0.4); /* Strong primary shadow */
+            --shadow-secondary: rgba(249, 226, 174, 0.3); /* Secondary shadow */
+            --shadow-secondary-strong: rgba(173, 164, 196, 0.4); /* Strong secondary shadow */
+            --shadow-danger: rgba(239, 68, 68, 0.3); /* Danger shadow */
+            --shadow-danger-strong: rgba(220, 38, 38, 0.4); /* Strong danger shadow */
+            --shadow-info: rgba(60, 42, 77, 0.2); /* Status card shadow */
+            --border-strong: rgba(60, 42, 77, 0.2); /* Input borders */
+            --divider: rgba(60, 42, 77, 0.1); /* Divider lines */
+            --side-panel-width: 360px; /* Width for right panels */
+            --chart-card-bg: rgba(255, 255, 255, 0.6); /* States card background */
+            --chart-card-border: rgba(60, 42, 77, 0.12); /* States card border */
+            --chart-card-shadow: rgba(60, 42, 77, 0.12); /* States card shadow */
+            --footer-border: rgba(60, 42, 77, 0.12); /* Footer divider */
+            --footer-text: rgba(60, 42, 77, 0.65); /* Footer text */
+            /* 3D visualization */
+            --color-scene-bg: #1a1a2e; /* Scene background */
+            --color-grid-light: #444444; /* Grid major lines */
+            --color-grid-dark: #222222; /* Grid minor lines */
+            --color-light: #ffffff; /* Scene lights */
+            --color-point-start: #00ff00; /* Start marker */
+            --color-point-end: #ff0000; /* End marker */
+            --color-point-mid: #ff8103; /* Intermediate marker */
+            --color-trajectory: #00aaff; /* Trajectory line */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Lato", Arial, sans-serif;
+            background: var(--color-bg);
+            margin: 0;
+            min-height: 100vh;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        header.hero {
+            padding: 18px 28px;
+            margin: 0;
+            background: linear-gradient(135deg, #3c2a4d 0%, #4f3c62 55%, #6c4c80 100%);
+            color: #f8f2ff;
+            box-shadow: 0 18px 35px rgba(60, 42, 77, 0.25);
+        }
+
+        header.hero h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header.hero p {
+            margin: 6px 0 0 0;
+            font-size: 15px;
+            color: rgba(248, 242, 255, 0.85);
+        }
+
+        #canvas-wrapper {
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--color-panel-bg-alpha);
+            padding: 24px;
+            border-radius: 22px;
+            box-shadow: 0 25px 55px rgba(60, 42, 77, 0.15);
+            min-width: 320px;
+            max-width: 380px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            z-index: 100;
+            border: 1px solid var(--color-panel-border);
+            backdrop-filter: blur(14px);
+        }
+
+        #controls h2 {
+            margin: 0 0 20px 0;
+            color: var(--color-primary);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-block {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(60, 42, 77, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 18px rgba(60, 42, 77, 0.08);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .control-column-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--color-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 6px;
+            accent-color: var(--color-button-primary);
+        }
+
+        .control-group .value-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--color-secondary);
+        }
+
+        .control-group input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: "Lato", Arial, sans-serif;
+            background: var(--color-white);
+            transition: border 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-strong);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: "Lato", Arial, sans-serif;
+            background: var(--color-white);
+            cursor: pointer;
+            transition: border 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .control-group input[type="number"]:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: var(--color-button-primary);
+            box-shadow: 0 0 0 3px rgba(166, 219, 240, 0.35);
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: var(--color-secondary);
+            margin-top: 6px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 14px;
+            background: var(--color-button-primary);
+            color: var(--color-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s, filter 0.2s;
+            font-size: 14px;
+            font-family: "Lato", Arial, sans-serif;
+            box-shadow: 0 4px 12px var(--shadow-accent);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--shadow-accent-strong);
+            background: var(--color-button-hover);
+            filter: brightness(1.02);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: var(--color-button-secondary);
+            color: var(--color-primary);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+        }
+
+        button.secondary:hover {
+            background: var(--color-button-hover);
+            box-shadow: 0 6px 16px var(--shadow-secondary-strong);
+        }
+
+        button.success {
+            background: var(--color-button-primary);
+            box-shadow: 0 10px 20px var(--shadow-accent-strong);
+        }
+
+        button.success:hover {
+            background: var(--color-button-hover);
+            box-shadow: 0 12px 24px var(--shadow-secondary-strong);
+        }
+
+        #info {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            background: var(--color-info-bg);
+            color: var(--color-white);
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 13px;
+            max-width: 320px;
+            z-index: 100;
+            box-shadow: 0 12px 30px var(--shadow-info);
+            border: 1px solid var(--color-info-border);
+            width: var(--side-panel-width);
+        }
+
+        #charts-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: var(--side-panel-width);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-left: 4px;
+            margin-bottom: 10px;
+        }
+
+        .chart-card {
+            background: var(--chart-card-bg);
+            border: 1px solid var(--chart-card-border);
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 12px 24px var(--chart-card-shadow);
+            width: 100%;
+        }
+
+        .chart-card h4 {
+            margin: 0 0 6px 0;
+            color: var(--color-primary);
+            font-size: 13px;
+            letter-spacing: 0.02em;
+        }
+
+        .chart-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chart {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+
+        #info h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-white);
+        }
+
+        #info p {
+            margin: 6px 0;
+            line-height: 1.5;
+            color: var(--color-white-soft);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .status.ready {
+            background: var(--color-status-ready);
+            color: var(--color-white);
+        }
+
+        .status.computing {
+            background: var(--color-button-secondary);
+            color: var(--color-primary);
+        }
+
+        #intermediate-points {
+            max-height: 320px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--divider);
+        }
+
+        #intermediate-points h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .intermediate-point {
+            background: linear-gradient(135deg, rgba(255, 253, 249, 0.95), rgba(255, 255, 255, 0.9));
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            border: 1px solid var(--divider);
+            box-shadow: 0 6px 18px var(--color-panel-shadow-soft);
+        }
+
+        .intermediate-point-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .intermediate-point-header h4 {
+            margin: 0;
+            font-size: 14px;
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .intermediate-point-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        button.small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        button.danger {
+            background: var(--color-button-danger);
+            color: var(--color-white);
+            box-shadow: 0 4px 12px var(--shadow-danger);
+        }
+
+        button.danger:hover {
+            background: var(--color-button-danger-hover);
+            box-shadow: 0 6px 16px var(--shadow-danger-strong);
+        }
+
+        #add-point-btn {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .waypoint-label {
+            font-size: 12px;
+            color: var(--color-secondary);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        /* Scrollbar styling */
+        #controls::-webkit-scrollbar,
+        #intermediate-points::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #controls::-webkit-scrollbar-track,
+        #intermediate-points::-webkit-scrollbar-track {
+            background: var(--color-scroll-track);
+            border-radius: 4px;
+        }
+
+        #controls::-webkit-scrollbar-thumb,
+        #intermediate-points::-webkit-scrollbar-thumb {
+            background: var(--color-scroll-thumb);
+            border-radius: 4px;
+        }
+
+        #controls::-webkit-scrollbar-thumb:hover,
+        #intermediate-points::-webkit-scrollbar-thumb:hover {
+            background: var(--color-scroll-thumb-hover);
+        }
+
+        footer.site-footer {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffffff;
+            font-size: 12px;
+            letter-spacing: 0.02em;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            text-align: center;
+            pointer-events: none;
+            margin: 0;
+        }
+
+        footer.site-footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <h1>Minimum Snap Trajectory</h1>
+        <p>Design smooth multi-waypoint paths and observe drone movements in real time.</p>
+    </header>
+    <div id="canvas-wrapper">
+        <div id="container">
+            <div id="canvas-container"></div>
+        
+        <div id="controls">
+            <div class="control-block">
+                <div class="control-grid">
+                    <div>
+                        <p class="control-column-title">Start Point</p>
+                        <div class="control-group">
+                            <label>Start Point X: <span id="start-x-val">0.0</span></label>
+                            <input type="range" id="start-x" min="-5" max="5" step="0.1" value="0">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Start Point Y: <span id="start-y-val">0.0</span></label>
+                            <input type="range" id="start-y" min="-5" max="5" step="0.1" value="0">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Start Point Z: <span id="start-z-val">0.0</span></label>
+                            <input type="range" id="start-z" min="-5" max="5" step="0.1" value="0">
+                        </div>
+                    </div>
+                    <div>
+                        <p class="control-column-title">End Point</p>
+                        <div class="control-group">
+                            <label>End Point X: <span id="end-x-val">3.0</span></label>
+                            <input type="range" id="end-x" min="-5" max="5" step="0.1" value="3">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>End Point Y: <span id="end-y-val">3.0</span></label>
+                            <input type="range" id="end-y" min="-5" max="5" step="0.1" value="3">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>End Point Z: <span id="end-z-val">3.0</span></label>
+                            <input type="range" id="end-z" min="-5" max="5" step="0.1" value="3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="basis-select">Trajectory Basis</label>
+                <select id="basis-select"></select>
+                <p class="helper-text" id="basis-description"></p>
+            </div>
+
+            <div class="control-group">
+                <label>Segment Duration (s): <span id="segment-duration-val">1.0</span></label>
+                <input type="range" id="segment-duration" min="0.2" max="5" step="0.1" value="1">
+                <p class="helper-text">Every segment of the path uses this duration.</p>
+            </div>
+            
+            <div id="intermediate-points">
+                <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--color-tertiary);">Intermediate Waypoints</h3>
+                <div id="intermediate-points-list"></div>
+                <div class="button-group" style="margin-top: 10px;">
+                    <button id="add-point-btn" class="secondary small">+ Add Point</button>
+                    <button id="random-points-btn" class="secondary small">🎲 Random</button>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="generate-btn" class="success">Generate Trajectory</button>
+                <button id="reset-btn" class="secondary">Reset</button>
+            </div>
+        </div>
+
+        <div id="info">
+            <h3>Status <span id="status" class="status ready">Ready</span></h3>
+            <p><strong>Instructions:</strong></p>
+            <p>• Adjust start/end points using sliders</p>
+            <p>• Add intermediate waypoints or generate random ones</p>
+            <p>• <strong>Drag orange spheres</strong> to move waypoints in 3D</p>
+            <p>• Click "Generate Trajectory" to compute</p>
+            <p>• Drag to rotate, scroll to zoom</p>
+            <p style="margin-top:8px;">
+                <span style="color:#00c853;font-weight:600;">● Green</span> Start&nbsp;&nbsp;
+                <span style="color:#ff1744;font-weight:600;">● Red</span> End&nbsp;&nbsp;
+                <span style="color:#ff9100;font-weight:600;">● Orange</span> Intermediate
+            </p>
+        </div>
+
+        <div id="charts-panel">
+            <div class="chart-card">
+                <h4>States Over Time</h4>
+                <div class="chart-stack">
+                    <div id="pos-chart" class="chart"></div>
+                    <div id="vel-chart" class="chart"></div>
+                    <div id="acc-chart" class="chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+        // Color variable map (shared between CSS & JS)
+        const COLOR_VARIABLES = {
+            sceneBackground: '--color-scene-bg',
+            gridPrimary: '--color-grid-light',
+            gridSecondary: '--color-grid-dark',
+            light: '--color-light',
+            startPoint: '--color-point-start',
+            startPointEmissive: '--color-point-start',
+            endPoint: '--color-point-end',
+            endPointEmissive: '--color-point-end',
+            intermediatePoint: '--color-point-mid',
+            intermediatePointEmissive: '--color-point-mid',
+            trajectoryLine: '--color-trajectory',
+            trajectoryPoint: '--color-trajectory'
+        };
+
+        function readColorPalette() {
+            const styles = getComputedStyle(document.documentElement);
+            const palette = {};
+            Object.entries(COLOR_VARIABLES).forEach(([key, variable]) => {
+                palette[key] = styles.getPropertyValue(variable).trim();
+            });
+            return palette;
+        }
+
+        const TRAJECTORY_BASES = {
+            min_snap: {
+                label: 'Minimum Snap (7th-order)',
+                derivativeOrder: 4,
+                polyOrder: 7,
+                description: 'Minimizes snap (4th derivative) for ultra-smooth camera-like motion.'
+            },
+            min_jerk: {
+                label: 'Minimum Jerk (5th-order)',
+                derivativeOrder: 3,
+                polyOrder: 5,
+                description: 'Reduces jerk for responsive yet smooth trajectories.'
+            },
+            min_accel: {
+                label: 'Minimum Acceleration (3rd-order)',
+                derivativeOrder: 2,
+                polyOrder: 3,
+                description: 'Fast cubic segments that prioritize low acceleration.'
+            }
+        };
+        
+        // Simple OrbitControls implementation
+        THREE.OrbitControls = function(camera, domElement) {
+            this.camera = camera;
+            this.domElement = domElement || document;
+            this.enableDamping = true;
+            this.dampingFactor = 0.05;
+            
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let spherical = new THREE.Spherical();
+            let target = new THREE.Vector3(0, 0, 0);
+            
+            const updateSpherical = () => {
+                const offset = new THREE.Vector3().subVectors(camera.position, target);
+                spherical.setFromVector3(offset);
+            };
+            
+            updateSpherical();
+            
+            const onMouseDown = (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            };
+            
+            const onMouseMove = (e) => {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                const offset = new THREE.Vector3().setFromSpherical(spherical);
+                camera.position.copy(target).add(offset);
+                camera.lookAt(target);
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            };
+            
+            const onMouseUp = () => {
+                isDragging = false;
+            };
+            
+            const onWheel = (e) => {
+                e.preventDefault();
+                const delta = e.deltaY * 0.001;
+                spherical.radius += delta;
+                spherical.radius = Math.max(2, Math.min(50, spherical.radius));
+                
+                const offset = new THREE.Vector3().setFromSpherical(spherical);
+                camera.position.copy(target).add(offset);
+                camera.lookAt(target);
+            };
+            
+            domElement.addEventListener('mousedown', onMouseDown);
+            domElement.addEventListener('mousemove', onMouseMove);
+            domElement.addEventListener('mouseup', onMouseUp);
+            domElement.addEventListener('wheel', onWheel);
+            
+            this.update = function() {
+                // Damping is handled in the move events
+            };
+        };
+    </script>
+    <script>
+        // Minimum Snap Trajectory Solver
+        class MinimumSnapSolver {
+            constructor(options = {}) {
+                const { polyOrder = 7, derivativeOrder = 4 } = options;
+                this.derivativeOrder = Math.max(1, derivativeOrder);
+                this.polyOrder = Math.max(polyOrder, this.derivativeOrder);
+            }
+
+            fallingFactorial(n, order) {
+                if (order === 0) return 1;
+                let result = 1;
+                for (let i = 0; i < order; i++) {
+                    result *= (n - i);
+                }
+                return result;
+            }
+
+            derivativeCoefficient(power, derivative) {
+                if (power < derivative) return 0;
+                return this.fallingFactorial(power, derivative);
+            }
+
+            derivativeValue(power, derivative, t) {
+                const coeff = this.derivativeCoefficient(power, derivative);
+                if (coeff === 0) return 0;
+                const exponent = power - derivative;
+                if (exponent === 0) return coeff;
+                return coeff * Math.pow(t, exponent);
+            }
+
+            computeQMatrix(T) {
+                const n = this.polyOrder + 1;
+                const Q = Array(n).fill(0).map(() => Array(n).fill(0));
+                const k = this.derivativeOrder;
+
+                for (let i = k; i < n; i++) {
+                    for (let j = k; j < n; j++) {
+                        const m = (i - k) + (j - k);
+                        const coeff_i = this.derivativeCoefficient(i, k);
+                        const coeff_j = this.derivativeCoefficient(j, k);
+                        Q[i][j] = coeff_i * coeff_j * Math.pow(T, m + 1) / (m + 1);
+                    }
+                }
+                return Q;
+            }
+
+            solveLinearSystem(matrix, rhs) {
+                const n = matrix.length;
+                const aug = matrix.map((row, i) => [...row, rhs[i]]);
+                const epsilon = 1e-12;
+                
+                for (let col = 0; col < n; col++) {
+                    let pivotRow = col;
+                    let maxVal = Math.abs(aug[pivotRow][col]);
+                    for (let r = col + 1; r < n; r++) {
+                        const val = Math.abs(aug[r][col]);
+                        if (val > maxVal) {
+                            maxVal = val;
+                            pivotRow = r;
+                        }
+                    }
+                    if (maxVal < epsilon) {
+                        aug[col][col] += 1e-9;
+                        maxVal = Math.abs(aug[col][col]);
+                        if (maxVal < epsilon) continue;
+                    } else if (pivotRow !== col) {
+                        [aug[col], aug[pivotRow]] = [aug[pivotRow], aug[col]];
+                    }
+                    
+                    const pivot = aug[col][col] || epsilon;
+                    for (let j = col; j <= n; j++) {
+                        aug[col][j] /= pivot;
+                    }
+                    
+                    for (let r = 0; r < n; r++) {
+                        if (r === col) continue;
+                        const factor = aug[r][col];
+                        if (Math.abs(factor) < epsilon) continue;
+                        for (let j = col; j <= n; j++) {
+                            aug[r][j] -= factor * aug[col][j];
+                        }
+                    }
+                }
+                
+                return aug.map(row => row[n]);
+            }
+
+            solve(waypoints, timeAllocation = 1.0) {
+                const nWaypoints = waypoints.length;
+                const nSegments = nWaypoints - 1;
+                const dim = waypoints[0].length;
+                const nCoeffs = (this.polyOrder + 1) * nSegments;
+
+                // For multiple segments, divide time equally
+                const segmentTimeAllocation = timeAllocation / nSegments;
+
+                // Build Q matrix (block diagonal)
+                const QList = [];
+                for (let i = 0; i < nSegments; i++) {
+                    QList.push(this.computeQMatrix(segmentTimeAllocation));
+                }
+
+                // Create block diagonal Q
+                const Q = Array(nCoeffs).fill(0).map(() => Array(nCoeffs).fill(0));
+                for (let i = 0; i < nSegments; i++) {
+                    const start = i * (this.polyOrder + 1);
+                    const end = start + (this.polyOrder + 1);
+                    const QSeg = QList[i];
+                    for (let r = 0; r < QSeg.length; r++) {
+                        for (let c = 0; c < QSeg[0].length; c++) {
+                            Q[start + r][start + c] = QSeg[r][c];
+                        }
+                    }
+                }
+
+                const boundaryDerivativeCount = this.derivativeOrder;
+                const continuityDerivativeCount = this.derivativeOrder;
+                let nConstraints;
+                if (nWaypoints === 2) {
+                    nConstraints = 2 * boundaryDerivativeCount * dim;
+                } else {
+                    nConstraints = nWaypoints * dim + (nWaypoints - 2) * continuityDerivativeCount * dim;
+                }
+                
+                const A = Array(nConstraints).fill(0).map(() => Array(nCoeffs * dim).fill(0));
+                const b = Array(nConstraints).fill(0);
+
+                let constraintIdx = 0;
+
+                if (nWaypoints === 2) {
+                    // Start-end case: add boundary conditions up to derivativeOrder-1
+                    for (let d = 0; d < dim; d++) {
+                        const coeffStart = d * nCoeffs;
+
+                        for (let deriv = 0; deriv < boundaryDerivativeCount; deriv++) {
+                            for (let j = deriv; j <= this.polyOrder; j++) {
+                                const value = this.derivativeValue(j, deriv, 0);
+                                if (value !== 0) {
+                                    A[constraintIdx][coeffStart + j] = value;
+                                }
+                            }
+                            b[constraintIdx] = deriv === 0 ? waypoints[0][d] : 0;
+                            constraintIdx++;
+                        }
+
+                        const tEnd = segmentTimeAllocation;
+                        for (let deriv = 0; deriv < boundaryDerivativeCount; deriv++) {
+                            for (let j = deriv; j <= this.polyOrder; j++) {
+                                const value = this.derivativeValue(j, deriv, tEnd);
+                                if (value !== 0) {
+                                    A[constraintIdx][coeffStart + j] = value;
+                                }
+                            }
+                            b[constraintIdx] = deriv === 0 ? waypoints[1][d] : 0;
+                            constraintIdx++;
+                        }
+                    }
+                } else {
+                    // Multiple waypoints case
+                    // Position constraints
+                    for (let i = 0; i < nWaypoints; i++) {
+                        let segmentIdx, tLocal;
+                        if (i === 0) {
+                            segmentIdx = 0;
+                            tLocal = 0;
+                        } else if (i === nWaypoints - 1) {
+                            segmentIdx = nSegments - 1;
+                            tLocal = 1;
+                        } else {
+                            segmentIdx = i - 1;
+                            tLocal = 1;
+                        }
+
+                        const tActual = tLocal * segmentTimeAllocation;
+
+                        for (let d = 0; d < dim; d++) {
+                            const coeffStart = d * nCoeffs + segmentIdx * (this.polyOrder + 1);
+                            for (let j = 0; j <= this.polyOrder; j++) {
+                                A[constraintIdx][coeffStart + j] = Math.pow(tActual, j);
+                            }
+                            b[constraintIdx] = waypoints[i][d];
+                            constraintIdx++;
+                        }
+                    }
+
+                    // Continuity constraints
+                    for (let i = 1; i < nWaypoints - 1; i++) {
+                        const prevSegment = i - 1;
+                        const nextSegment = i;
+                        const TPrev = segmentTimeAllocation;
+
+                        for (let deriv = 0; deriv < this.derivativeOrder; deriv++) {
+                            for (let d = 0; d < dim; d++) {
+                                const coeffStartPrev = d * nCoeffs + prevSegment * (this.polyOrder + 1);
+                                const coeffStartNext = d * nCoeffs + nextSegment * (this.polyOrder + 1);
+
+                                // Previous segment at t = TPrev
+                                for (let j = deriv; j <= this.polyOrder; j++) {
+                                    const value = this.derivativeValue(j, deriv, TPrev);
+                                    if (value !== 0) {
+                                        A[constraintIdx][coeffStartPrev + j] = value;
+                                    }
+                                }
+
+                                // Next segment at t = 0
+                                for (let j = deriv; j <= this.polyOrder; j++) {
+                                    const value = this.derivativeValue(j, deriv, 0);
+                                    if (value !== 0) {
+                                        A[constraintIdx][coeffStartNext + j] -= value;
+                                    }
+                                }
+
+                                b[constraintIdx] = 0;
+                                constraintIdx++;
+                            }
+                        }
+                    }
+                }
+
+                // Build Q_full for all dimensions
+                const nVars = nCoeffs * dim;
+                const QFull = Array(nVars).fill(0).map(() => Array(nVars).fill(0));
+                for (let d = 0; d < dim; d++) {
+                    const offset = d * nCoeffs;
+                    for (let i = 0; i < nCoeffs; i++) {
+                        for (let j = 0; j < nCoeffs; j++) {
+                            QFull[offset + i][offset + j] = Q[i][j];
+                        }
+                    }
+                }
+
+                const totalSize = nVars + nConstraints;
+                const KKT = Array(totalSize).fill(0).map(() => Array(totalSize).fill(0));
+                const rhs = Array(totalSize).fill(0);
+                const regularization = 1e-9;
+
+                // Top-left block (Q + reg*I)
+                for (let i = 0; i < nVars; i++) {
+                    for (let j = 0; j < nVars; j++) {
+                        KKT[i][j] = QFull[i][j];
+                    }
+                    KKT[i][i] += regularization;
+                }
+
+                // Top-right and bottom-left blocks (A^T and A)
+                for (let i = 0; i < nVars; i++) {
+                    for (let j = 0; j < nConstraints; j++) {
+                        const val = A[j][i];
+                        KKT[i][nVars + j] = val;
+                        KKT[nVars + j][i] = val;
+                    }
+                }
+
+                // RHS (first block zeros, second block = b)
+                for (let i = 0; i < nConstraints; i++) {
+                    rhs[nVars + i] = b[i];
+                }
+
+                try {
+                    const solution = this.solveLinearSystem(KKT, rhs);
+                    const primal = solution.slice(0, nVars);
+                    
+                    // Reshape coefficients
+                    const coeffs = [];
+                    for (let seg = 0; seg < nSegments; seg++) {
+                        const segCoeffs = [];
+                        for (let order = 0; order <= this.polyOrder; order++) {
+                            const dimCoeffs = [];
+                            for (let d = 0; d < dim; d++) {
+                                const idx = d * nCoeffs + seg * (this.polyOrder + 1) + order;
+                                dimCoeffs.push(primal[idx]);
+                            }
+                            segCoeffs.push(dimCoeffs);
+                        }
+                        coeffs.push(segCoeffs);
+                    }
+                    return coeffs;
+                } catch (e) {
+                    console.error("Optimization failed:", e);
+                    return null;
+                }
+            }
+
+            evaluate(coeffs, t, derivative = 0, timeAllocation = 1.0, nSegments = 1) {
+                // Find which segment this time belongs to
+                // t is normalized [0, 1] across all segments
+                const segmentTime = 1.0 / nSegments;
+                let segmentIdx = Math.floor(t / segmentTime);
+                if (segmentIdx >= nSegments) segmentIdx = nSegments - 1;
+                if (segmentIdx < 0) segmentIdx = 0;
+                
+                // Local time within the segment [0, 1]
+                const tLocal = (t - segmentIdx * segmentTime) / segmentTime;
+                // Actual time for this segment (equal allocation per segment)
+                const segmentTimeAllocation = timeAllocation / nSegments;
+                const tActual = tLocal * segmentTimeAllocation;
+                
+                const dim = coeffs[0][0].length;
+                const result = Array(dim).fill(0);
+
+                for (let d = 0; d < dim; d++) {
+                    for (let i = derivative; i <= this.polyOrder; i++) {
+                        let coeff = coeffs[segmentIdx][i][d];
+                        for (let k = 0; k < derivative; k++) {
+                            coeff *= (i - k);
+                        }
+                        result[d] += coeff * Math.pow(tActual, i - derivative);
+                    }
+                }
+                return result;
+            }
+        }
+
+        // 3D Visualization
+        class TrajectoryVisualizer {
+            constructor(container, colors = {}) {
+                this.container = container;
+                this.colors = colors || {};
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(this.getColorValue('sceneBackground', '#1a1a2e'));
+                
+                this.camera = new THREE.PerspectiveCamera(
+                    75,
+                    container.clientWidth / container.clientHeight,
+                    0.1,
+                    1000
+                );
+                this.camera.position.set(8, 8, 8);
+                this.camera.lookAt(0, 0, 0);
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(container.clientWidth, container.clientHeight);
+                this.renderer.shadowMap.enabled = true;
+                container.appendChild(this.renderer.domElement);
+
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+
+                this.setupScene();
+                this.createDrone();
+                this.setupDragging();
+                this.animate();
+            }
+
+            getColorValue(name, fallback) {
+                const value = (this.colors && this.colors[name]) || '';
+                return value && value.length ? value : fallback;
+            }
+
+            mapToWorld(x, y, z) {
+                return new THREE.Vector3(
+                    parseFloat(x) || 0,
+                    parseFloat(z) || 0,
+                    parseFloat(y) || 0
+                );
+            }
+
+            worldToLogical(vec) {
+                return {
+                    x: vec.x,
+                    y: vec.z,
+                    z: vec.y
+                };
+            }
+
+            setupScene() {
+                // Grid
+                const gridHelper = new THREE.GridHelper(
+                    20,
+                    20,
+                    new THREE.Color(this.getColorValue('gridPrimary', '#444444')),
+                    new THREE.Color(this.getColorValue('gridSecondary', '#222222'))
+                );
+                this.scene.add(gridHelper);
+
+                // Axes
+                const axesGroup = new THREE.Group();
+                const axisLength = 3.5;
+                const origin = new THREE.Vector3(0, 0, 0);
+                axesGroup.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, axisLength, 0xff0000));
+                axesGroup.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, axisLength, 0x00ff00));
+                axesGroup.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), origin, axisLength, 0x0000ff));
+                this.scene.add(axesGroup);
+
+                // Lights
+                const lightColor = this.getColorValue('light', '#ffffff');
+                const ambientLight = new THREE.AmbientLight(lightColor, 0.6);
+                this.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(lightColor, 0.8);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+            }
+
+            createDrone() {
+                const bodyGeometry = new THREE.BoxGeometry(0.35, 0.12, 0.25);
+                const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.5, roughness: 0.35 });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+
+                const canopyGeometry = new THREE.BoxGeometry(0.2, 0.08, 0.18);
+                const canopyMaterial = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.2, roughness: 0.4 });
+                const canopy = new THREE.Mesh(canopyGeometry, canopyMaterial);
+                canopy.position.y = 0.11;
+
+                const armMaterial = new THREE.MeshStandardMaterial({ color: 0x1f2937 });
+                const armGeometry = new THREE.CylinderGeometry(0.015, 0.015, 0.7, 12);
+                const armX = new THREE.Mesh(armGeometry, armMaterial);
+                armX.rotation.z = Math.PI / 2;
+                const armZ = armX.clone();
+                armZ.rotation.y = Math.PI / 2;
+
+                const rotorMaterial = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6, roughness: 0.2 });
+                const rotorGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.006, 32);
+                const rotors = [];
+                const rotorOffsets = [
+                    [0.35, 0.05, 0],
+                    [-0.35, 0.05, 0],
+                    [0, 0.05, 0.35],
+                    [0, 0.05, -0.35]
+                ];
+                rotorOffsets.forEach(([x, y, z]) => {
+                    const rotor = new THREE.Mesh(rotorGeometry, rotorMaterial);
+                    rotor.position.set(x, y, z);
+                    rotors.push(rotor);
+                });
+
+                const navLightMaterial = new THREE.MeshStandardMaterial({ emissive: 0xff0055, emissiveIntensity: 0.8, color: 0x000000 });
+                const navLight = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 12), navLightMaterial);
+                navLight.position.set(0, 0.06, 0.15);
+
+                this.droneGroup = new THREE.Group();
+                this.droneGroup.add(body);
+                this.droneGroup.add(canopy);
+                this.droneGroup.add(armX);
+                this.droneGroup.add(armZ);
+                rotors.forEach(r => this.droneGroup.add(r));
+                this.droneGroup.add(navLight);
+                this.droneGroup.position.set(0, 0.2, 0);
+                this.scene.add(this.droneGroup);
+
+                this.droneTrajectory = null;
+            }
+
+            setDroneTrajectory(options) {
+                this.droneTrajectory = options;
+                this.droneStartTime = performance.now();
+            }
+
+            updateStartPoint(x, y, z) {
+                if (this.startPoint) {
+                    this.scene.remove(this.startPoint);
+                }
+                const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+                const color = this.getColorValue('startPoint', '#00ff00');
+                const emissive = this.getColorValue('startPointEmissive', color);
+                const material = new THREE.MeshStandardMaterial({ 
+                    color,
+                    emissive,
+                    emissiveIntensity: 0.5
+                });
+                this.startPoint = new THREE.Mesh(geometry, material);
+                this.startPoint.position.copy(this.mapToWorld(x, y, z));
+                this.startPoint.userData.isDraggable = false;
+                this.scene.add(this.startPoint);
+            }
+
+            updateEndPoint(x, y, z) {
+                if (this.endPoint) {
+                    this.scene.remove(this.endPoint);
+                }
+                const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+                const color = this.getColorValue('endPoint', '#ff0000');
+                const emissive = this.getColorValue('endPointEmissive', color);
+                const material = new THREE.MeshStandardMaterial({ 
+                    color,
+                    emissive,
+                    emissiveIntensity: 0.5
+                });
+                this.endPoint = new THREE.Mesh(geometry, material);
+                this.endPoint.position.copy(this.mapToWorld(x, y, z));
+                this.endPoint.userData.isDraggable = false;
+                this.scene.add(this.endPoint);
+            }
+
+            updateIntermediatePoints(waypoints) {
+                // Remove all old intermediate points
+                if (this.intermediatePoints) {
+                    this.intermediatePoints.forEach(p => {
+                        if (p.mesh) {
+                            this.scene.remove(p.mesh);
+                            // Dispose geometry and material to free memory
+                            if (p.mesh.geometry) p.mesh.geometry.dispose();
+                            if (p.mesh.material) p.mesh.material.dispose();
+                        }
+                    });
+                }
+                this.intermediatePoints = [];
+
+                // Create all intermediate waypoints fresh (skip first and last which are start/end)
+                // waypoints array structure: [start, ...intermediate, end]
+                for (let i = 1; i < waypoints.length - 1; i++) {
+                    const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+                    const color = this.getColorValue('intermediatePoint', '#ffaa00');
+                    const emissive = this.getColorValue('intermediatePointEmissive', color);
+                    const material = new THREE.MeshStandardMaterial({ 
+                        color,
+                        emissive,
+                        emissiveIntensity: 0.4
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    // Ensure waypoint[i] is a valid array with 3 elements
+                    if (Array.isArray(waypoints[i]) && waypoints[i].length >= 3) {
+                        mesh.position.copy(this.mapToWorld(
+                            waypoints[i][0],
+                            waypoints[i][1],
+                            waypoints[i][2]
+                        ));
+                    } else {
+                        console.warn('Invalid waypoint at index', i, ':', waypoints[i]);
+                        mesh.position.set(0, 0, 0);
+                    }
+                    mesh.userData.isWaypoint = true;
+                    mesh.userData.waypointIndex = i;
+                    mesh.userData.isDraggable = true;
+                    this.scene.add(mesh);
+                    
+                    this.intermediatePoints.push({ mesh, waypointIndex: i });
+                }
+            }
+
+            setupDragging() {
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.draggedObject = null;
+                this.plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+                this.intersectionPoint = new THREE.Vector3();
+                this.offset = new THREE.Vector3();
+
+                const onMouseDown = (event) => {
+                    event.preventDefault();
+                    const rect = this.renderer.domElement.getBoundingClientRect();
+                    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                    this.raycaster.setFromCamera(this.mouse, this.camera);
+                    const intersects = this.raycaster.intersectObjects(
+                        this.scene.children.filter(obj => obj.userData.isDraggable)
+                    );
+
+                    if (intersects.length > 0) {
+                        this.draggedObject = intersects[0].object;
+                        this.controls.enabled = false;
+
+                        // Calculate offset
+                        const planeNormal = new THREE.Vector3();
+                        this.camera.getWorldDirection(planeNormal);
+                        const plane = new THREE.Plane(planeNormal, 0);
+                        plane.setFromNormalAndCoplanarPoint(planeNormal, this.draggedObject.position);
+                        this.raycaster.ray.intersectPlane(plane, this.intersectionPoint);
+                        this.offset.copy(this.draggedObject.position).sub(this.intersectionPoint);
+                    }
+                };
+
+                const onMouseMove = (event) => {
+                    if (this.draggedObject) {
+                        const rect = this.renderer.domElement.getBoundingClientRect();
+                        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                        this.raycaster.setFromCamera(this.mouse, this.camera);
+                        
+                        // Create plane perpendicular to camera view
+                        const planeNormal = new THREE.Vector3();
+                        this.camera.getWorldDirection(planeNormal);
+                        const plane = new THREE.Plane(planeNormal, 0);
+                        plane.setFromNormalAndCoplanarPoint(planeNormal, this.draggedObject.position);
+                        
+                        if (this.raycaster.ray.intersectPlane(plane, this.intersectionPoint)) {
+                            const newPosition = new THREE.Vector3().copy(this.intersectionPoint).add(this.offset);
+                            this.draggedObject.position.copy(newPosition);
+                            
+                            // Update slider values
+                            if (this.draggedObject.userData.waypointIndex !== undefined) {
+                                const waypointIdx = this.draggedObject.userData.waypointIndex;
+                                // waypointIdx is the index in the full waypoints array (1 to n-2 for intermediate points)
+                                // Get all waypoints to find the correct intermediate point index
+                                const waypoints = getAllWaypoints();
+                                
+                                if (waypointIdx > 0 && waypointIdx < waypoints.length - 1) {
+                                    // This is an intermediate point
+                                    // The intermediate point index in the UI is waypointIdx - 1 (since start is at 0)
+                                    const intermediateList = document.getElementById('intermediate-points-list');
+                                    const pointElements = intermediateList.querySelectorAll('.intermediate-point');
+                                    const uiArrayIndex = waypointIdx - 1;
+                                    
+                                    if (uiArrayIndex >= 0 && uiArrayIndex < pointElements.length) {
+                                        const pointEl = pointElements[uiArrayIndex];
+                                        const uiIdx = parseInt(pointEl.dataset.index);
+                                        
+                                        const xEl = document.getElementById(`inter-x-${uiIdx}`);
+                                        const yEl = document.getElementById(`inter-y-${uiIdx}`);
+                                        const zEl = document.getElementById(`inter-z-${uiIdx}`);
+                                        
+                                        if (xEl && yEl && zEl) {
+                                            const logical = this.worldToLogical(this.draggedObject.position);
+                                            xEl.value = logical.x.toFixed(1);
+                                            yEl.value = logical.y.toFixed(1);
+                                            zEl.value = logical.z.toFixed(1);
+                                            
+                                            updateValueDisplay(`inter-x-val-${uiIdx}`, logical.x);
+                                            updateValueDisplay(`inter-y-val-${uiIdx}`, logical.y);
+                                            updateValueDisplay(`inter-z-val-${uiIdx}`, logical.z);
+                                            
+                                            // Regenerate trajectory if auto-update is enabled
+                                            if (window.autoUpdateTrajectory) {
+                                                generateTrajectory();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const onMouseUp = () => {
+                    if (this.draggedObject) {
+                        this.draggedObject = null;
+                        this.controls.enabled = true;
+                    }
+                };
+
+                this.renderer.domElement.addEventListener('mousedown', onMouseDown);
+                this.renderer.domElement.addEventListener('mousemove', onMouseMove);
+                this.renderer.domElement.addEventListener('mouseup', onMouseUp);
+            }
+
+            updateTrajectory(coeffs, timeAllocation = 1.0, nSegments = 1) {
+                // Remove old trajectory
+                if (this.trajectoryLine) {
+                    this.scene.remove(this.trajectoryLine);
+                }
+                if (this.trajectoryPoints) {
+                    this.trajectoryPoints.forEach(p => this.scene.remove(p));
+                    this.trajectoryPoints = [];
+                }
+
+                if (!coeffs) return;
+
+                const activeSolver = solver || createSolverForBasis(currentBasisKey);
+                const nPoints = 100;
+                const points = [];
+
+                for (let i = 0; i <= nPoints; i++) {
+                    const t = i / nPoints;
+                    const pos = activeSolver.evaluate(coeffs, t, 0, timeAllocation, nSegments);
+                    points.push(this.mapToWorld(pos[0], pos[1], pos[2]));
+                }
+
+                // Create line
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({ 
+                    color: this.getColorValue('trajectoryLine', '#00aaff'),
+                    linewidth: 3
+                });
+                this.trajectoryLine = new THREE.Line(geometry, material);
+                this.scene.add(this.trajectoryLine);
+
+                // Add points along trajectory
+                this.trajectoryPoints = [];
+                for (let i = 0; i < points.length; i += 10) {
+                    const pointGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                    const pointMaterial = new THREE.MeshBasicMaterial({ 
+                        color: this.getColorValue('trajectoryPoint', '#00aaff') 
+                    });
+                    const point = new THREE.Mesh(pointGeometry, pointMaterial);
+                    point.position.copy(points[i]);
+                    this.scene.add(point);
+                    this.trajectoryPoints.push(point);
+                }
+
+                if (this.droneGroup) {
+                    this.setDroneTrajectory({
+                        coeffs,
+                        timeAllocation,
+                        nSegments,
+                        solverOptions: { polyOrder: solver.polyOrder, derivativeOrder: solver.derivativeOrder }
+                    });
+                }
+
+                return points.length;
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                this.updateDronePosition();
+                this.controls.update();
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            onResize() {
+                const width = this.container.clientWidth;
+                const height = this.container.clientHeight;
+                this.camera.aspect = width / height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(width, height);
+            }
+
+            updateDronePosition() {
+                if (!this.droneTrajectory || !this.droneGroup) return;
+
+                const { coeffs, timeAllocation, nSegments, solverOptions } = this.droneTrajectory;
+                if (!coeffs) return;
+                if (!this.droneSolver || this.droneSolver.polyOrder !== solverOptions.polyOrder || this.droneSolver.derivativeOrder !== solverOptions.derivativeOrder) {
+                    this.droneSolver = new MinimumSnapSolver(solverOptions);
+                }
+
+                const elapsed = (performance.now() - this.droneStartTime) / 1000;
+                if (elapsed > timeAllocation) {
+                    this.droneTrajectory = null;
+                    return;
+                }
+                const duration = Math.max(timeAllocation, 0.1);
+                const tNorm = elapsed / duration;
+                const pos = this.droneSolver.evaluate(coeffs, tNorm, 0, timeAllocation, nSegments);
+
+                if (Array.isArray(pos) && pos.length >= 3) {
+                    this.droneGroup.position.copy(this.mapToWorld(pos[0], pos[1], pos[2]));
+                }
+            }
+        }
+
+        // Main Application
+        let visualizer;
+        let currentBasisKey = 'min_snap';
+        let solver = createSolverForBasis(currentBasisKey);
+        let intermediatePointCounter = 0;
+        let colorPalette = {};
+
+        function createSolverForBasis(key) {
+            const preset = TRAJECTORY_BASES[key] || TRAJECTORY_BASES.min_snap;
+            return new MinimumSnapSolver(preset);
+        }
+
+        function updateValueDisplay(id, value) {
+            const labelEl = document.getElementById(id);
+            if (!labelEl) return;
+            const numericValue = typeof value === 'number' ? value : parseFloat(value);
+            const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
+            labelEl.textContent = safeValue.toFixed(1);
+        }
+
+        function getPointValues() {
+            const parseCoord = (value) => {
+                const parsed = parseFloat(value);
+                return Number.isFinite(parsed) ? parsed : 0;
+            };
+            
+            const start = [
+                parseCoord(document.getElementById('start-x').value),
+                parseCoord(document.getElementById('start-y').value),
+                parseCoord(document.getElementById('start-z').value)
+            ];
+            const end = [
+                parseCoord(document.getElementById('end-x').value),
+                parseCoord(document.getElementById('end-y').value),
+                parseCoord(document.getElementById('end-z').value)
+            ];
+            
+            // Get intermediate points in DOM order
+            const intermediate = [];
+            const intermediateList = document.getElementById('intermediate-points-list');
+            const pointElements = intermediateList.querySelectorAll('.intermediate-point');
+            
+            pointElements.forEach(pointEl => {
+                const idx = pointEl.dataset.index;
+                const xEl = document.getElementById(`inter-x-${idx}`);
+                const yEl = document.getElementById(`inter-y-${idx}`);
+                const zEl = document.getElementById(`inter-z-${idx}`);
+                
+                // Only add if all elements exist
+                if (xEl && yEl && zEl) {
+                    intermediate.push([
+                        parseCoord(xEl.value),
+                        parseCoord(yEl.value),
+                        parseCoord(zEl.value)
+                    ]);
+                }
+            });
+            
+            return { start, end, intermediate };
+        }
+
+        function getAllWaypoints() {
+            const points = getPointValues();
+            const waypoints = [points.start];
+            waypoints.push(...points.intermediate);
+            waypoints.push(points.end);
+            return waypoints;
+        }
+
+        function getSegmentDuration() {
+            const slider = document.getElementById('segment-duration');
+            if (!slider) return 1;
+            const value = parseFloat(slider.value);
+            return Number.isFinite(value) ? Math.max(0.1, value) : 1;
+        }
+
+        function populateBasisSelector(defaultKey = 'min_snap') {
+            const select = document.getElementById('basis-select');
+            if (!select) return;
+            select.innerHTML = '';
+            Object.entries(TRAJECTORY_BASES).forEach(([key, cfg]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = cfg.label;
+                select.appendChild(option);
+            });
+            select.value = defaultKey;
+        }
+
+        function updateBasisDescription(key) {
+            const desc = document.getElementById('basis-description');
+            if (!desc) return;
+            const preset = TRAJECTORY_BASES[key];
+            desc.textContent = preset ? preset.description : '';
+        }
+
+        const AXIS_LABELS = ['X', 'Y', 'Z'];
+        const AXIS_COLORS = ['#2563eb', '#f97316', '#10b981'];
+
+        function updateStateCharts(coeffs, timeAllocation = 1.0, nSegments = 1) {
+            if (typeof Plotly === 'undefined') return;
+            if (!coeffs) {
+                ['pos-chart', 'vel-chart', 'acc-chart'].forEach(id => Plotly.purge(id));
+                return;
+            }
+
+            const samples = 200;
+            const times = [];
+            const posSeries = [[], [], []];
+            const velSeries = [[], [], []];
+            const accSeries = [[], [], []];
+
+            for (let i = 0; i <= samples; i++) {
+                const tNorm = i / samples;
+                const actualTime = tNorm * timeAllocation;
+                times.push(actualTime);
+
+                const position = solver.evaluate(coeffs, tNorm, 0, timeAllocation, nSegments);
+                const velocity = solver.evaluate(coeffs, tNorm, 1, timeAllocation, nSegments);
+                const acceleration = solver.evaluate(coeffs, tNorm, 2, timeAllocation, nSegments);
+
+                for (let axis = 0; axis < 3; axis++) {
+                    posSeries[axis].push(position[axis]);
+                    velSeries[axis].push(velocity[axis]);
+                    accSeries[axis].push(acceleration[axis]);
+                }
+            }
+
+            const makeTraces = (series) => series.map((values, axisIdx) => ({
+                x: times,
+                y: values,
+                name: AXIS_LABELS[axisIdx],
+                mode: 'lines',
+                line: { color: AXIS_COLORS[axisIdx], width: 2 },
+                hovertemplate: `t=%{x:.2f}s<br>${AXIS_LABELS[axisIdx]}=%{y:.2f}<extra></extra>`
+            }));
+
+            const layout = (yTitle) => ({
+                margin: { l: 60, r: 18, t: 2, b: 32 },
+                legend: { orientation: 'h', y: 1.15 },
+                hovermode: 'closest',
+                xaxis: { title: 'Time (s)', zeroline: false, automargin: true },
+                yaxis: { title: yTitle, zeroline: false, automargin: true },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            });
+
+            Plotly.react('pos-chart', makeTraces(posSeries), layout('Position (m)'));
+            Plotly.react('vel-chart', makeTraces(velSeries), layout('Velocity (m/s)'));
+            Plotly.react('acc-chart', makeTraces(accSeries), layout('Acceleration (m/s²)'));
+        }
+
+        function addIntermediatePoint(x = 1.5, y = 1.5, z = 1.5) {
+            const idx = intermediatePointCounter++;
+            const list = document.getElementById('intermediate-points-list');
+            
+            const pointDiv = document.createElement('div');
+            pointDiv.className = 'intermediate-point';
+            pointDiv.dataset.index = idx;
+            
+            pointDiv.innerHTML = `
+                <div class="intermediate-point-header">
+                    <h4>Point ${idx + 1}</h4>
+                    <div class="intermediate-point-controls">
+                        <button class="small danger" onclick="removeIntermediatePoint(${idx})">Remove</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="waypoint-label">X: <span id="inter-x-val-${idx}">${x.toFixed(1)}</span></label>
+                    <input type="range" id="inter-x-${idx}" min="-5" max="5" step="0.1" value="${x}" 
+                           oninput="updateValueDisplay('inter-x-val-${idx}', this.value); updateVisualization();">
+                </div>
+                <div class="control-group">
+                    <label class="waypoint-label">Y: <span id="inter-y-val-${idx}">${y.toFixed(1)}</span></label>
+                    <input type="range" id="inter-y-${idx}" min="-5" max="5" step="0.1" value="${y}"
+                           oninput="updateValueDisplay('inter-y-val-${idx}', this.value); updateVisualization();">
+                </div>
+                <div class="control-group">
+                    <label class="waypoint-label">Z: <span id="inter-z-val-${idx}">${z.toFixed(1)}</span></label>
+                    <input type="range" id="inter-z-${idx}" min="0" max="5" step="0.1" value="${z}"
+                           oninput="updateValueDisplay('inter-z-val-${idx}', this.value); updateVisualization();">
+                </div>
+            `;
+            
+            list.appendChild(pointDiv);
+            updateVisualization();
+        }
+
+        function removeIntermediatePoint(idx) {
+            const pointEl = document.querySelector(`.intermediate-point[data-index="${idx}"]`);
+            if (pointEl) {
+                pointEl.remove();
+                updateVisualization();
+            }
+        }
+
+        function generateRandomPoints(count = 3) {
+            // Clear existing intermediate points
+            document.getElementById('intermediate-points-list').innerHTML = '';
+            intermediatePointCounter = 0;
+            
+            // Generate random points
+            for (let i = 0; i < count; i++) {
+                const x = (Math.random() * 6 - 3).toFixed(1); // -3 to 3
+                const y = (Math.random() * 6 - 3).toFixed(1); // -3 to 3
+                const z = (Math.random() * 3 + 1).toFixed(1);  // 1 to 4
+                addIntermediatePoint(parseFloat(x), parseFloat(y), parseFloat(z));
+            }
+            
+            // Auto-generate trajectory
+            generateTrajectory();
+        }
+
+        function generateTrajectory() {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = 'Computing...';
+            statusEl.className = 'status computing';
+
+            const waypoints = getAllWaypoints();
+            
+            // Validate waypoints
+            if (waypoints.length < 2) {
+                statusEl.textContent = 'Error: Need at least 2 waypoints';
+                statusEl.className = 'status computing';
+                return;
+            }
+            
+            // Log waypoints for debugging
+            console.log('Generating trajectory with waypoints:', waypoints);
+            
+            const nSegments = waypoints.length - 1;
+            const segmentDuration = getSegmentDuration();
+            const totalTime = Math.max(1, nSegments) * segmentDuration;
+            
+            setTimeout(() => {
+                try {
+                    const coeffs = solver.solve(waypoints, totalTime);
+                    if (coeffs) {
+                        const nPoints = visualizer.updateTrajectory(coeffs, totalTime, nSegments);
+                        updateStateCharts(coeffs, totalTime, nSegments);
+                        statusEl.textContent = 'Ready';
+                        statusEl.className = 'status ready';
+                    } else {
+                        statusEl.textContent = 'Failed';
+                        statusEl.className = 'status computing';
+                        updateStateCharts(null);
+                    }
+                } catch (e) {
+                    console.error('Trajectory generation error:', e);
+                    statusEl.textContent = 'Error';
+                    statusEl.className = 'status computing';
+                    updateStateCharts(null);
+                }
+            }, 100);
+        }
+
+        function updateVisualization() {
+            if (!visualizer) {
+                console.warn('Visualizer not initialized yet');
+                return;
+            }
+            
+            const points = getPointValues();
+            visualizer.updateStartPoint(points.start[0], points.start[1], points.start[2]);
+            visualizer.updateEndPoint(points.end[0], points.end[1], points.end[2]);
+            
+            const waypoints = getAllWaypoints();
+            // Update intermediate points - this will recreate all meshes with correct positions
+            visualizer.updateIntermediatePoints(waypoints);
+        }
+
+        // Wait for Three.js to load
+        function initApp() {
+            if (typeof THREE === 'undefined') {
+                setTimeout(initApp, 100);
+                return;
+            }
+            
+            // Initialize
+            const container = document.getElementById('canvas-container');
+            colorPalette = readColorPalette();
+            visualizer = new TrajectoryVisualizer(container, colorPalette);
+            populateBasisSelector(currentBasisKey);
+            updateBasisDescription(currentBasisKey);
+            const basisSelect = document.getElementById('basis-select');
+            if (basisSelect) {
+                basisSelect.addEventListener('change', (e) => {
+                    currentBasisKey = e.target.value;
+                    solver = createSolverForBasis(currentBasisKey);
+                    updateBasisDescription(currentBasisKey);
+                    generateTrajectory();
+                });
+            }
+
+            // Setup controls
+            ['start-x', 'start-y', 'start-z', 'end-x', 'end-y', 'end-z'].forEach(id => {
+                const slider = document.getElementById(id);
+                const valId = id + '-val';
+                slider.addEventListener('input', (e) => {
+                    updateValueDisplay(valId, parseFloat(e.target.value));
+                    updateVisualization();
+                });
+            });
+
+            const durationSlider = document.getElementById('segment-duration');
+            if (durationSlider) {
+                updateValueDisplay('segment-duration-val', parseFloat(durationSlider.value));
+                durationSlider.addEventListener('input', (e) => {
+                    updateValueDisplay('segment-duration-val', parseFloat(e.target.value));
+                    generateTrajectory();
+                });
+            }
+
+            document.getElementById('generate-btn').addEventListener('click', generateTrajectory);
+            document.getElementById('add-point-btn').addEventListener('click', () => {
+                addIntermediatePoint();
+            });
+            document.getElementById('random-points-btn').addEventListener('click', () => {
+                generateRandomPoints(3);
+            });
+            
+            // Add checkbox for auto-update trajectory when dragging
+            const autoUpdateCheckbox = document.createElement('div');
+            autoUpdateCheckbox.className = 'control-group';
+            autoUpdateCheckbox.style.marginTop = '10px';
+            autoUpdateCheckbox.innerHTML = `
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="auto-update-checkbox" style="margin-right: 5px;">
+                    <span style="font-size: 12px;">Auto-update trajectory when dragging</span>
+                </label>
+            `;
+            document.getElementById('controls').insertBefore(autoUpdateCheckbox, document.getElementById('controls').querySelector('.button-group'));
+            
+            document.getElementById('auto-update-checkbox').addEventListener('change', (e) => {
+                window.autoUpdateTrajectory = e.target.checked;
+            });
+            
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                document.getElementById('start-x').value = 0;
+                document.getElementById('start-y').value = 0;
+                document.getElementById('start-z').value = 0;
+                document.getElementById('end-x').value = 3;
+                document.getElementById('end-y').value = 3;
+                document.getElementById('end-z').value = 3;
+                if (durationSlider) {
+                    durationSlider.value = 1;
+                    updateValueDisplay('segment-duration-val', 1);
+                }
+                ['start-x', 'start-y', 'start-z', 'end-x', 'end-y', 'end-z'].forEach(id => {
+                    updateValueDisplay(id + '-val', parseFloat(document.getElementById(id).value));
+                });
+                
+                // Clear intermediate points
+                document.getElementById('intermediate-points-list').innerHTML = '';
+                intermediatePointCounter = 0;
+                
+                updateVisualization();
+                generateTrajectory();
+            });
+            
+            // Make removeIntermediatePoint available globally
+            window.removeIntermediatePoint = removeIntermediatePoint;
+
+            // Add a sample intermediate point for demonstration
+            addIntermediatePoint(1.5, 1.5, 1.5);
+            
+            // Initial visualization
+            updateVisualization();
+            generateTrajectory();
+
+            // Handle resize
+            window.addEventListener('resize', () => visualizer.onResize());
+        }
+        
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+</script>
+<footer class="site-footer">
+    <p>© 2025 Yuwei Wu | With the assistance of GPT</p>
+</footer>
+</body>
+</html>

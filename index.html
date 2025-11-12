@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <head>
 		<title>Yuwei Wu</title>
@@ -14,9 +13,6 @@
 			
 		<!-- Bootstrap CSS (v4.5.2) -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-		<!-- Google Fonts: Poppins -->
-		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 		<!-- Font Awesome (latest - version 6.5.0) -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -57,31 +53,17 @@
 						<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarMore">
 						  <a class="dropdown-item" href="https://im4rob.github.io/" target="_blank">RSS25 Workshop</a>
 						  <a class="dropdown-item" href="./more/bvp_demo.html">BVP demo</a>
+						  <a class="dropdown-item" href="./more/min_snap.html">Min snap demo</a>
 						</div>
 					  </li>
 
 				
-				</ul>
-			</div>
-		</nav>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<section id="Main-Part" style="position: relative; overflow: hidden;">
+		</ul>
+		</div>
+	</nav>
 
-			  <!-- Background Section -->
-			<!-- <div class="background-container">
-			</div> -->
-
-
-			<div class="container custom-container-width">
-				<!-- <div class = "row">		
-					<div class="col-md-12">
-						<h3 class="subtitle">About</h3>	
-						<hr class="m-y-2">	
-					</div>
-				</div> -->
+	<section id="Main-Part" class="pt-5 mt-5" style="position: relative; overflow: hidden;">
+		<div class="container custom-container-width">
 
 				<div class="row">
 					<div class="col-md-3" >
@@ -101,9 +83,9 @@
 					</div>
 
 					<div class="col-md-9">
-						<div class = "content-block">
-							<br/>
-							<p class = "extra-roles">
+					<div class = "content-block">
+						<br/>
+						<p>
 							I'm Yuwei, a fourth-year Ph.D. candidate in Electrical and Systems Engineering at the University of Pennsylvania, 
 							in the General Robotics, Automation, Sensing, and Perception (GRASP) Laboratory, 
 							under the supervision of Prof.  <a href="https://www.kumarrobotics.org/">Vijay Kumar</a>. 
@@ -292,7 +274,6 @@
 							</div>
 
 						</div>
-
 						<div class="grid">
 							<div class="card">
 							<img src="img/1.png" alt="Trajectory Planning for Differentially-Flat Robots">
@@ -309,93 +290,67 @@
 							<span class="caption">Multi-robot Coordination</span>
 							</div>
 							<!-- Add more cards following the same pattern -->
+
 						</div>
 
 
 
-						<script>
-							const MAX_VISIBLE = 8;
-							const list = document.getElementById('newsList');
-							const items = list.getElementsByTagName('li');
-							const toggleBtn = document.querySelector('.toggle-button');
-							let expanded = false;
-						
-							function toggleNews() {
-							expanded = !expanded;
-							for (let i = MAX_VISIBLE; i < items.length; i++) {
-								items[i].style.display = expanded ? 'list-item' : 'none';
-							}
-							toggleBtn.textContent = expanded ? 'Show less ↑' : 'Show more ↓';
-							}
-						
-							// Hide items beyond MAX_VISIBLE initially
-							window.onload = () => {
-							for (let i = MAX_VISIBLE; i < items.length; i++) {
-								items[i].style.display = 'none';
-							}
-							};
-						</script>
+		<script>
+			const MAX_VISIBLE = 8;
+			const list = document.getElementById('newsList');
+			const items = list.getElementsByTagName('li');
+			const toggleBtn = document.querySelector('.toggle-button');
+			let expanded = false;
+		
+			function toggleNews() {
+				expanded = !expanded;
+				for (let i = MAX_VISIBLE; i < items.length; i++) {
+					items[i].style.display = expanded ? 'list-item' : 'none';
+				}
+				toggleBtn.textContent = expanded ? 'Show less ↑' : 'Show more ↓';
+			}
+		
+			for (let i = MAX_VISIBLE; i < items.length; i++) {
+				items[i].style.display = 'none';
+			}
+		</script>
 											
 					</div>
 			    </div>
 			</div>
-		</section>
+	</section>
 
-		<section id="Main-Part">
+	<section id="supplementary-content" class="mt-5">
+		<div id="bodyContent1"></div>
+		<div id="bodyContent2"></div>
+		<div id="bodyContent3"></div>
+	</section>
 
-			<div id="bodyContent1"></div>
-			<script>
-				// Load body-content.html into the div
+	<hr>
+	<div>
+		<ul class="copyright" style="text-align:center;">
+			&copy; 2025 Yuwei Wu | Last update: 09/2025
+		</ul>
+	</div>
 
-				fetch("publications/content.html")
+	<script>
+		const remoteSections = [
+			{ id: 'bodyContent1', url: 'publications/content.html' },
+			{ id: 'bodyContent2', url: 'experience/content.html' },
+			{ id: 'bodyContent3', url: 'contact/content.html' }
+		];
+
+		remoteSections.forEach(({ id, url }) => {
+			const target = document.getElementById(id);
+			if (!target) return;
+			fetch(url)
 				.then(response => response.text())
-				.then(data => {
-					document.getElementById("bodyContent1").innerHTML = data;
+				.then(html => {
+					target.innerHTML = html;
 				})
-				.catch(error => console.log("Error loading the content: ", error));
-			</script>
-
-
-			<div id="bodyContent2"></div>
-			<script>
-				// Load body-content.html into the div
-
-				fetch("experience/content.html")
-				.then(response => response.text())
-				.then(data => {
-					document.getElementById("bodyContent2").innerHTML = data;
-				})
-				.catch(error => console.log("Error loading the content: ", error));
-			</script>
-
-
-
-			<div id="bodyContent3"></div>
-			<script>
-				// Load body-content.html into the div
-
-				fetch("contact/content.html")
-				.then(response => response.text())
-				.then(data => {
-					document.getElementById("bodyContent3").innerHTML = data;
-				})
-				.catch(error => console.log("Error loading the content: ", error));
-			</script>
-
-
-		</section>
-	
-
-
-
-		<br/>
-		<hr>
-		<div>
-			<br/>
-			<ul class="copyright",style="text-align:center;" >
-				&copy; 2025 Yuwei Wu | Last update: 09/2025
-			</ul>
-		</div>
+				.catch(error => console.error(`Error loading ${url}:`, error));
+		});
+	</script>
 
 		<!-- jQuery (slim version for Bootstrap 4) -->
 		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -407,7 +362,6 @@
 
 		<!-- Bootstrap JS Bundle -->
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-
 	</body>
 
 </html>

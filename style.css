@@ -1,19 +1,53 @@
-	
+
+	:root {
+		--color-bg: #f7f5fb;
+		--color-surface: #ffffff;
+		--color-surface-muted: #fdfaff;
+		--color-white: #ffffff;
+		--color-text: #2d2542;
+		--color-muted: #6d6384;
+		--color-heading: #35245f;
+		--color-accent: #60499c;
+		--color-accent-light: #8b78cf;
+		--color-gold: #f4c542;
+		--color-link: #533b94;
+		--color-link-hover: #8b78cf;
+		--color-navbar-text: #2d254288;
+		--color-card-border: #ded6f3;
+		--color-caption: #824b8d;
+	}
+
 	body{
 		font-family: Arial, serif, sans-serif;
 		font-weight: 200;
 		font-size: 92%;
 		position: relative;
+		color: var(--color-text);
+		background-color: var(--color-bg);
+		line-height: 1.55;
+	}
+
+	a {
+		color: var(--color-link);
+		text-decoration: none;
+		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+	}
+
+	a:hover,
+	a:focus-visible {
+		color: var(--color-link-hover);
+		text-decoration: underline;
+		text-decoration-color: rgba(139, 110, 245, 0.4);
 	}
 
 	.body_index {
-		background-color: #ffffff;
+		background-color: var(--color-white);
 	}
 	.body_style {
-		background-color:#ffffff;
+		background-color: var(--color-white);
 	}
 	.subtitle{
-		color: #563D7C;
+		color: var(--color-heading);
 		font-family:  'Lato', sans-serif;
 		text-align:center;
 		font-weight: 360;
@@ -54,7 +88,7 @@
 	.yuwei-name{
 		font-family: "Times New Roman", Times, serif;
 		font-weight: bold;
-		color:#563D7C;
+		color: var(--color-accent);
 		font-style:italic;
 	}
 
@@ -95,8 +129,8 @@
 
 	
 	.fa_custom {
-			color: #FFD700;
-	}	
+			color: var(--color-gold);
+	} 
 
 	.progress{
 		width: 30%;
@@ -109,13 +143,13 @@
 	.social-icon {
 		font-size: 16px;      /* Adjust size here */
 		margin: 0 5px;        /* Spacing between icons */
-		color: #563D7C;       /* Default icon color */
+		color: var(--color-accent);       /* Default icon color */
 		text-decoration: none;
 		transition: color 0.3s;
 	  }
 	
 	.social-icon:hover {
-	    color: #563D7C;       /* Color on hover */
+	    color: var(--color-accent-light);       /* Color on hover */
 	}
 
 
@@ -144,12 +178,18 @@
 		margin: auto;
 		font-family: Arial, sans-serif;
 		font-size: 14px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-card-border);
+		border-radius: 14px;
+		padding: 18px 22px;
+		box-shadow: 0 12px 24px rgba(45, 37, 66, 0.08);
 	  }
 	  
 	  .news-section h3 {
 		font-weight: 600;
 		margin-bottom: 8px;
 		font-size: 16px;
+		color: var(--color-heading);
 	  }
 	  
 	  .news-list {
@@ -161,22 +201,25 @@
 	  .news-list li {
 		margin-bottom: 4px;
 		line-height: 1.4;
+		color: var(--color-text);
 	  }
 	  
 	  .news-list a {
-		color: #007bff;
+		color: var(--color-link);
 		text-decoration: none;
+		font-weight: 500;
 	  }
 	  
 	  .news-list a:hover {
 		text-decoration: underline;
+		text-decoration-color: rgba(108, 73, 201, 0.4);
 	  }
 	  
 	  .toggle-button {
 		margin-top: 6px;
 		display: inline-block;
 		cursor: pointer;
-		color: #007bff;
+		color: var(--color-link);
 		font-weight: 600;
 		font-size: 13px;
 	  }
@@ -209,11 +252,11 @@
 	}
 	/* Custom Navbar Styles */
 	.navbar-custom {
-		background-color: #fff;
+		background-color: var(--color-surface);
 		border: none;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		font-family: 'Lato', sans-serif;
-		font-weight: 360;
+		font-weight: 380;
 		font-size: 18px;
 	}
 	
@@ -221,7 +264,18 @@
 	.navbar-custom a,
 	.navbar-custom .nav-link,
 	.navbar-custom .navbar-brand {
-		color: #757575;
+		color: var(--color-navbar-text);
+		transition: color 0.2s ease;
+	}
+
+	.navbar-custom a:hover,
+	.navbar-custom .nav-link:hover,
+	.navbar-custom .navbar-brand:hover,
+	.navbar-custom a:focus-visible,
+	.navbar-custom .nav-link:focus-visible,
+	.navbar-custom .navbar-brand:focus-visible {
+		color: var(--color-accent);
+		text-decoration: none;
 	}
 
 	/* Emphasize name part of the brand */
@@ -284,7 +338,7 @@
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: var(--color-bg);
   margin: 0;
 }
 
@@ -299,12 +353,12 @@ body {
 }
 
 .card {
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--color-white);
+  border: 1px solid var(--color-card-border);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  transition: transform 0.2s;
+  transition: box-shadow 0.2s ease;
   padding: 10px;
   width: 100%;           /* ensures it fits inside grid cell */
   max-width: 300px;      /* optional: sets max width of each card */
@@ -312,7 +366,7 @@ body {
 }
 
 .card:hover {
-  transform: scale(1.02);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.12);
 }
 
 .card img {
@@ -324,6 +378,6 @@ body {
 .caption {
   padding: 10px;
   font-weight: bold;
-  color: #800000;
+  color: var(--color-caption);
   text-align: center;
 }
