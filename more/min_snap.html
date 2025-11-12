@@ -75,7 +75,9 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
             position: relative;
         }
 
@@ -167,6 +169,8 @@
             cursor: pointer;
             transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
             font-family: "Lato", Arial, sans-serif;
+            box-shadow: none;
+            transform: none;
         }
 
         .controls-toggle:hover,
@@ -610,11 +614,20 @@
             }
 
             #canvas-wrapper {
+                flex: initial;
                 min-height: 55vh;
+                height: auto;
+                overflow: visible;
+                padding: 0 16px 32px;
             }
 
             #container {
+                height: auto;
+            }
+
+            #canvas-container {
                 height: 55vh;
+                min-height: 320px;
             }
 
             #controls,
@@ -650,6 +663,12 @@
             #info {
                 width: 100%;
                 margin-bottom: 32px;
+            }
+
+            footer.site-footer {
+                position: static;
+                transform: none;
+                margin: 16px auto 32px;
             }
 
             .control-grid {
@@ -722,7 +741,7 @@
                 <select id="basis-select"></select>
                 <p class="helper-text" id="basis-description"></p>
             </div>
-
+            
             <div class="control-group">
                 <label>Segment Duration (s): <span id="segment-duration-val">1.0</span></label>
                 <input type="range" id="segment-duration" min="0.2" max="5" step="0.1" value="1">
@@ -872,6 +891,9 @@
             }
         };
         
+        const DEFAULT_DRONE_COLOR = '#60a5fa';
+        const ROTOR_COLOR = '#f8fafc';
+        
         // Simple OrbitControls implementation
         THREE.OrbitControls = function(camera, domElement) {
             this.camera = camera;
@@ -880,6 +902,8 @@
             this.dampingFactor = 0.05;
             
             let isDragging = false;
+            let isPinching = false;
+            let initialPinchDistance = 0;
             let previousMousePosition = { x: 0, y: 0 };
             let spherical = new THREE.Spherical();
             let target = new THREE.Vector3(0, 0, 0);
@@ -917,6 +941,68 @@
                 isDragging = false;
             };
             
+            const getTouchDistance = (touches) => {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            };
+
+            const onTouchStart = (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    isPinching = false;
+                    const touch = e.touches[0];
+                    previousMousePosition = { x: touch.clientX, y: touch.clientY };
+                } else if (e.touches.length === 2) {
+                    isDragging = false;
+                    isPinching = true;
+                    initialPinchDistance = getTouchDistance(e.touches);
+                }
+            };
+
+            const onTouchMove = (e) => {
+                if (isDragging && e.touches.length === 1) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const deltaX = touch.clientX - previousMousePosition.x;
+                    const deltaY = touch.clientY - previousMousePosition.y;
+
+                    spherical.theta -= deltaX * 0.01;
+                    spherical.phi += deltaY * 0.01;
+                    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+
+                    const offset = new THREE.Vector3().setFromSpherical(spherical);
+                    camera.position.copy(target).add(offset);
+                    camera.lookAt(target);
+
+                    previousMousePosition = { x: touch.clientX, y: touch.clientY };
+                } else if (isPinching && e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = getTouchDistance(e.touches);
+                    const delta = (initialPinchDistance - currentDistance) * 0.002;
+                    spherical.radius += delta;
+                    spherical.radius = Math.max(2, Math.min(50, spherical.radius));
+
+                    const offset = new THREE.Vector3().setFromSpherical(spherical);
+                    camera.position.copy(target).add(offset);
+                    camera.lookAt(target);
+
+                    initialPinchDistance = currentDistance;
+                }
+            };
+
+            const onTouchEnd = (e) => {
+                if (e.touches.length === 0) {
+                    isDragging = false;
+                    isPinching = false;
+                } else if (e.touches.length === 1) {
+                    isPinching = false;
+                    isDragging = true;
+                    const touch = e.touches[0];
+                    previousMousePosition = { x: touch.clientX, y: touch.clientY };
+                }
+            };
+            
             const onWheel = (e) => {
                 e.preventDefault();
                 const delta = e.deltaY * 0.001;
@@ -932,6 +1018,10 @@
             domElement.addEventListener('mousemove', onMouseMove);
             domElement.addEventListener('mouseup', onMouseUp);
             domElement.addEventListener('wheel', onWheel);
+            domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+            domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+            domElement.addEventListener('touchend', onTouchEnd);
+            domElement.addEventListener('touchcancel', onTouchEnd);
             
             this.update = function() {
                 // Damping is handled in the move events
@@ -1254,11 +1344,12 @@
 
         // 3D Visualization
         class TrajectoryVisualizer {
-            constructor(container, colors = {}) {
+            constructor(container, colors = {}, initialDroneColor = DEFAULT_DRONE_COLOR) {
                 this.container = container;
                 this.colors = colors || {};
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(this.getColorValue('sceneBackground', '#1a1a2e'));
+                this.droneColor = initialDroneColor || DEFAULT_DRONE_COLOR;
                 
                 this.camera = new THREE.PerspectiveCamera(
                     75,
@@ -1337,11 +1428,12 @@
 
             createDrone() {
                 const bodyGeometry = new THREE.BoxGeometry(0.35, 0.12, 0.25);
-                const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.5, roughness: 0.35 });
+                const bodyMaterial = new THREE.MeshStandardMaterial({ color: this.droneColor, metalness: 0.45, roughness: 0.35 });
                 const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
 
                 const canopyGeometry = new THREE.BoxGeometry(0.2, 0.08, 0.18);
-                const canopyMaterial = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.2, roughness: 0.4 });
+                const canopyBaseColor = this.lightenColor(this.droneColor, 0.45);
+                const canopyMaterial = new THREE.MeshStandardMaterial({ color: canopyBaseColor, metalness: 0.2, roughness: 0.4 });
                 const canopy = new THREE.Mesh(canopyGeometry, canopyMaterial);
                 canopy.position.y = 0.11;
 
@@ -1352,7 +1444,7 @@
                 const armZ = armX.clone();
                 armZ.rotation.y = Math.PI / 2;
 
-                const rotorMaterial = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6, roughness: 0.2 });
+                const rotorMaterial = new THREE.MeshStandardMaterial({ color: ROTOR_COLOR, metalness: 0.5, roughness: 0.2 });
                 const rotorGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.006, 32);
                 const rotors = [];
                 const rotorOffsets = [
@@ -1381,7 +1473,38 @@
                 this.droneGroup.position.set(0, 0.2, 0);
                 this.scene.add(this.droneGroup);
 
+                this.droneBodyMaterial = bodyMaterial;
+                this.droneCanopyMaterial = canopyMaterial;
+                this.droneRotorMeshes = rotors;
                 this.droneTrajectory = null;
+            }
+
+            lightenColor(hex, amount = 0.3) {
+                try {
+                    const color = new THREE.Color(hex);
+                    const white = new THREE.Color(0xffffff);
+                    color.lerp(white, amount);
+                    return `#${color.getHexString()}`;
+                } catch (e) {
+                    return hex;
+                }
+            }
+
+            setDroneColor(colorHex) {
+                if (!colorHex) return;
+                this.droneColor = colorHex;
+                const canopyColor = this.lightenColor(colorHex, 0.45);
+                if (this.droneBodyMaterial) {
+                    this.droneBodyMaterial.color.set(colorHex);
+                }
+                if (this.droneCanopyMaterial) {
+                    this.droneCanopyMaterial.color.set(canopyColor);
+                }
+                if (this.droneRotorMeshes && this.droneRotorMeshes.length) {
+                    this.droneRotorMeshes.forEach(rotor => {
+                        rotor.material.color.set(ROTOR_COLOR);
+                    });
+                }
             }
 
             setDroneTrajectory(options) {
@@ -1954,9 +2077,9 @@
             // Initialize
             const container = document.getElementById('canvas-container');
             colorPalette = readColorPalette();
-            visualizer = new TrajectoryVisualizer(container, colorPalette);
             populateBasisSelector(currentBasisKey);
             updateBasisDescription(currentBasisKey);
+            visualizer = new TrajectoryVisualizer(container, colorPalette, DEFAULT_DRONE_COLOR);
             const basisSelect = document.getElementById('basis-select');
             if (basisSelect) {
                 basisSelect.addEventListener('change', (e) => {
