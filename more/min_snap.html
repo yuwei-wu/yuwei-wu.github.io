@@ -128,17 +128,55 @@
             min-width: 320px;
             max-width: 380px;
             max-height: calc(100vh - 40px);
-            overflow-y: auto;
+            overflow: hidden;
             z-index: 100;
             border: 1px solid var(--color-panel-border);
             backdrop-filter: blur(14px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        #controls h2 {
-            margin: 0 0 20px 0;
+        #controls .controls-body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+
+        .controls-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .controls-heading {
+            margin: 0;
             color: var(--color-primary);
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
+        }
+
+        .controls-toggle {
+            border: 1px solid rgba(60, 42, 77, 0.3);
+            background: rgba(60, 42, 77, 0.08);
+            color: var(--color-primary);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+            font-family: "Lato", Arial, sans-serif;
+        }
+
+        .controls-toggle:hover,
+        .controls-toggle:focus-visible {
+            background: rgba(60, 42, 77, 0.2);
+            outline: none;
+        }
+
+        #controls.collapsed .controls-body {
+            display: none;
         }
 
         .control-group {
@@ -291,6 +329,50 @@
             box-shadow: 0 12px 30px var(--shadow-info);
             border: 1px solid var(--color-info-border);
             width: var(--side-panel-width);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .info-heading {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-white);
+            margin: 0;
+        }
+
+        .info-toggle {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--color-white);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: "Lato", Arial, sans-serif;
+            transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .info-toggle:hover,
+        .info-toggle:focus-visible {
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #info.collapsed #info-body {
+            display: none;
         }
 
         #charts-panel {
@@ -321,6 +403,37 @@
             color: var(--color-primary);
             font-size: 13px;
             letter-spacing: 0.02em;
+        }
+
+        .chart-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .chart-stack-toggle {
+            border: 1px solid rgba(60, 42, 77, 0.3);
+            background: rgba(60, 42, 77, 0.08);
+            color: var(--color-primary);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+            font-family: "Lato", Arial, sans-serif;
+        }
+
+        .chart-stack-toggle:hover,
+        .chart-stack-toggle:focus-visible {
+            background: rgba(60, 42, 77, 0.2);
+            outline: none;
+        }
+
+        .chart-card.collapsed .chart-stack {
+            display: none;
         }
 
         .chart-stack {
@@ -439,24 +552,24 @@
         }
 
         /* Scrollbar styling */
-        #controls::-webkit-scrollbar,
+        #controls .controls-body::-webkit-scrollbar,
         #intermediate-points::-webkit-scrollbar {
             width: 8px;
         }
 
-        #controls::-webkit-scrollbar-track,
+        #controls .controls-body::-webkit-scrollbar-track,
         #intermediate-points::-webkit-scrollbar-track {
             background: var(--color-scroll-track);
             border-radius: 4px;
         }
 
-        #controls::-webkit-scrollbar-thumb,
+        #controls .controls-body::-webkit-scrollbar-thumb,
         #intermediate-points::-webkit-scrollbar-thumb {
             background: var(--color-scroll-thumb);
             border-radius: 4px;
         }
 
-        #controls::-webkit-scrollbar-thumb:hover,
+        #controls .controls-body::-webkit-scrollbar-thumb:hover,
         #intermediate-points::-webkit-scrollbar-thumb:hover {
             background: var(--color-scroll-thumb-hover);
         }
@@ -525,6 +638,11 @@
                 backdrop-filter: none;
             }
 
+            #controls .controls-body {
+                overflow: visible;
+                max-height: none;
+            }
+
             #charts-panel {
                 padding-left: 0;
             }
@@ -554,6 +672,12 @@
             <div id="canvas-container"></div>
         
         <div id="controls">
+            <div class="controls-header">
+                <h4>Settings
+                    <button class="controls-toggle" type="button" id="controls-toggle" aria-expanded="true" aria-controls="controls-body">Hide</button>
+                </h4>
+            </div>
+            <div class="controls-body" id="controls-body">
             <div class="control-block">
                 <div class="control-grid">
                     <div>
@@ -610,7 +734,7 @@
                 <div id="intermediate-points-list"></div>
                 <div class="button-group" style="margin-top: 10px;">
                     <button id="add-point-btn" class="secondary small">+ Add Point</button>
-                    <button id="random-points-btn" class="secondary small">🎲 Random</button>
+                    <button id="random-points-btn" class="secondary small">Random</button>
                 </div>
             </div>
             
@@ -618,34 +742,87 @@
                 <button id="generate-btn" class="success">Generate Trajectory</button>
                 <button id="reset-btn" class="secondary">Reset</button>
             </div>
+            </div>
         </div>
 
         <div id="info">
-            <h3>Status <span id="status" class="status ready">Ready</span></h3>
-            <p><strong>Instructions:</strong></p>
-            <p>• Adjust start/end points using sliders</p>
-            <p>• Add intermediate waypoints or generate random ones</p>
-            <p>• <strong>Drag orange spheres</strong> to move waypoints in 3D</p>
-            <p>• Click "Generate Trajectory" to compute</p>
-            <p>• Drag to rotate, scroll to zoom</p>
-            <p style="margin-top:8px;">
-                <span style="color:#00c853;font-weight:600;">● Green</span> Start&nbsp;&nbsp;
-                <span style="color:#ff1744;font-weight:600;">● Red</span> End&nbsp;&nbsp;
-                <span style="color:#ff9100;font-weight:600;">● Orange</span> Intermediate
-            </p>
+            <div class="info-header">
+                <h3>Status <span id="status" class="status ready">Ready</span>
+                <button class="info-toggle" type="button" id="info-toggle" aria-expanded="true" aria-controls="info-body">Hide</button>
+                </h3>
+            </div>
+            <div class="info-body" id="info-body">
+                <p><strong>Instructions:</strong></p>
+                <p>• Adjust start/end points using sliders</p>
+                <p>• Add intermediate waypoints or generate random ones</p>
+                <p>• <strong>Drag orange spheres</strong> to move waypoints in 3D</p>
+                <p>• Click "Generate Trajectory" to compute</p>
+                <p>• Drag to rotate, scroll to zoom</p>
+                <p style="margin-top:8px;">
+                    <span style="color:#00c853;font-weight:600;">● Start</span> &nbsp;&nbsp;
+                    <span style="color:#ff1744;font-weight:600;">● End</span> &nbsp;&nbsp;
+                    <span style="color:#ff9100;font-weight:600;">● Intermediate</span> 
+                </p>
+            </div>
         </div>
 
         <div id="charts-panel">
-            <div class="chart-card">
-                <h4>States Over Time</h4>
-                <div class="chart-stack">
-                    <div id="pos-chart" class="chart"></div>
-                    <div id="vel-chart" class="chart"></div>
-                    <div id="acc-chart" class="chart"></div>
+                <div class="chart-card" id="state-charts-card">
+                    <div class="chart-card-header">
+                        <h4>States Over Time
+                            <button class="chart-stack-toggle" type="button" id="chart-stack-toggle" aria-expanded="true" aria-controls="chart-stack">Hide</button>
+                        </h4>
+                    </div>
+                    <div class="chart-stack" id="chart-stack">
+                        <div id="pos-chart" class="chart"></div>
+                        <div id="vel-chart" class="chart"></div>
+                        <div id="acc-chart" class="chart"></div>
+                    </div>
                 </div>
-            </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chartToggleButton = document.getElementById('chart-stack-toggle');
+            const chartCard = document.getElementById('state-charts-card');
+            const chartStack = document.getElementById('chart-stack');
+            if (chartToggleButton && chartCard && chartStack) {
+                chartStack.setAttribute('aria-hidden', 'false');
+                chartToggleButton.addEventListener('click', () => {
+                    const collapsed = chartCard.classList.toggle('collapsed');
+                    chartStack.setAttribute('aria-hidden', collapsed.toString());
+                    chartToggleButton.setAttribute('aria-expanded', (!collapsed).toString());
+                    chartToggleButton.textContent = collapsed ? 'Show' : 'Hide';
+                });
+            }
+
+            const infoPanel = document.getElementById('info');
+            const infoToggle = document.getElementById('info-toggle');
+            const infoBody = document.getElementById('info-body');
+            if (infoPanel && infoToggle && infoBody) {
+                infoBody.setAttribute('aria-hidden', 'false');
+                infoToggle.addEventListener('click', () => {
+                    const collapsed = infoPanel.classList.toggle('collapsed');
+                    infoBody.setAttribute('aria-hidden', collapsed.toString());
+                    infoToggle.setAttribute('aria-expanded', (!collapsed).toString());
+                    infoToggle.textContent = collapsed ? 'Show' : 'Hide';
+                });
+            }
+
+            const controlsPanel = document.getElementById('controls');
+            const controlsToggle = document.getElementById('controls-toggle');
+            const controlsBody = document.getElementById('controls-body');
+            if (controlsPanel && controlsToggle && controlsBody) {
+                controlsBody.setAttribute('aria-hidden', 'false');
+                controlsToggle.addEventListener('click', () => {
+                    const collapsed = controlsPanel.classList.toggle('collapsed');
+                    controlsBody.setAttribute('aria-hidden', collapsed.toString());
+                    controlsToggle.setAttribute('aria-expanded', (!collapsed).toString());
+                    controlsToggle.textContent = collapsed ? 'Show' : 'Hide';
+                });
+            }
+        });
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script>
@@ -1827,7 +2004,18 @@
                     <span style="font-size: 12px;">Auto-update trajectory when dragging</span>
                 </label>
             `;
-            document.getElementById('controls').insertBefore(autoUpdateCheckbox, document.getElementById('controls').querySelector('.button-group'));
+            const controlsPanel = document.getElementById('controls');
+            const controlsBody = document.getElementById('controls-body');
+            const buttonGroup = controlsBody ? controlsBody.querySelector('.button-group') : null;
+            if (controlsBody) {
+                if (buttonGroup) {
+                    controlsBody.insertBefore(autoUpdateCheckbox, buttonGroup);
+                } else {
+                    controlsBody.appendChild(autoUpdateCheckbox);
+                }
+            } else if (controlsPanel) {
+                controlsPanel.appendChild(autoUpdateCheckbox);
+            }
             
             document.getElementById('auto-update-checkbox').addEventListener('change', (e) => {
                 window.autoUpdateTrajectory = e.target.checked;

@@ -30,7 +30,7 @@
       min-height: 100vh;
     }
     header {
-      background: var(--macaron-blush);
+      background: linear-gradient(135deg, var(--macaron-blush), var(--macaron-lilac), var(--macaron-mint));
       color: var(--macaron-ink);
       padding: 18px 28px;
       margin: 0;
@@ -435,7 +435,7 @@
           <div class="vector-card">
           <header>
             <strong>Start position p₀</strong>
-            <small>Range: (-3, -3, -1) → (3, 3, 3)</small>
+            <small>Range: (-2, -2, -2) → (2, 2, 2)</small>
           </header>
           <div class="vector-inputs">
             <label>x<input id="p0-x" type="number" step="0.01" value="0.0" /></label>
@@ -447,7 +447,7 @@
           <div class="vector-card">
           <header>
             <strong>Start velocity v₀</strong>
-            <small>Range: (-1, -1, -1) → (1, 1, 1)</small>
+            <small>Range: (-1.5, -1.5, -1.5) → (1.5, 1.5, 1.5)</small>
           </header>
           <div class="vector-inputs">
             <label>x<input id="v0-x" type="number" step="0.01" value="0.0" /></label>
@@ -459,7 +459,7 @@
           <div class="vector-card">
           <header>
             <strong>Start acceleration a₀</strong>
-            <small>Range: (-0.5, -0.5, -0.5) → (0.5, 0.5, 0.5)</small>
+            <small>Range: (-2, -2, -2) → (2, 2, 2)</small>
           </header>
           <div class="vector-inputs">
             <label>x<input id="a0-x" type="number" step="0.01" value="0.0" /></label>
@@ -473,7 +473,7 @@
           <div class="vector-card">
           <header>
             <strong>End position p₁</strong>
-            <small>Range: (-3, -3, -1) → (3, 3, 3)</small>
+            <small>Range: (-2, -2, -2) → (2, 2, 2)</small>
           </header>
           <div class="vector-inputs">
             <label>x<input id="p1-x" type="number" step="0.01" value="0.0" /></label>
@@ -485,7 +485,7 @@
           <div class="vector-card">
           <header>
             <strong>End velocity v₁</strong>
-            <small>Range: (-1, -1, -1) → (1, 1, 1)</small>
+            <small>Range: (-1.5, -1.5, -1.5) → (1.5, 1.5, 1.5)</small>
           </header>
           <div class="vector-inputs">
             <label>x<input id="v1-x" type="number" step="0.01" value="0.0" /></label>
@@ -497,7 +497,7 @@
           <div class="vector-card">
           <header>
             <strong>End acceleration a₁</strong>
-            <small>Range: (-0.5, -0.5, -0.5) → (0.5, 0.5, 0.5)</small>
+            <small>Range: (-2, -2, -2) → (2, 2, 2)</small>
           </header>
           <div class="vector-inputs">
             <label>x<input id="a1-x" type="number" step="0.01" value="0.0" /></label>
@@ -618,7 +618,7 @@
     </section>
 
     <section class="panel">
-      <h2>Infeasible Boundary Diagnostics</h2>
+      <h2>Boundary Diagnostics</h2>
       <div id="boundary-container"></div>
     </section>
 
@@ -641,12 +641,12 @@
     function initializeApp() {
     // Configuration
     const vectors = {
-      p0: [[-3, -3, -1], [3, 3, 3]],
-      v0: [[-1, -1, -1], [1, 1, 1]],
-      a0: [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]],
-      p1: [[-3, -3, -1], [3, 3, 3]],
-      v1: [[-1, -1, -1], [1, 1, 1]],
-      a1: [[-0.5, -0.5, -0.5], [0.5, 0.5, 0.5]]
+      p0: [[-2, -2, -2], [2, 2, 2]],
+      v0: [[-1.5, -1.5, -1.5], [1.5, 1.5, 1.5]],
+      a0: [[-2, -2, -2], [2, 2, 2]],
+      p1: [[-2, -2, -2], [2, 2, 2]],
+      v1: [[-1.5, -1.5, -1.5], [1.5, 1.5, 1.5]],
+      a1: [[-2, -2, -2], [2, 2, 2]]
     };
 
     const DURATIONS = Array.from({ length: 30 }, (_, i) => 0.5 + (9.5 * i) / 29);
@@ -671,21 +671,21 @@
         label: "Position",
         field: "positions",
         color: "#2563eb",
-        axisLimits: { x: [-3, 3], y: [-3, 3], z: [-1, 3] }
+        axisLimits: { x: [-2, 2], y: [-2, 2], z: [-2, 2] }
       },
       {
         key: "vel",
         label: "Velocity",
         field: "velocities",
         color: "#f97316",
-        axisLimits: { x: [-1, 1], y: [-1, 1], z: [-1, 1] }
+        axisLimits: { x: [-1.5, 1.5], y: [-1.5, 1.5], z: [-1.5, 1.5] }
       },
       {
         key: "acc",
         label: "Acceleration",
         field: "accelerations",
         color: "#10b981",
-        axisLimits: { x: [-0.5, 0.5], y: [-0.5, 0.5], z: [-0.5, 0.5] }
+        axisLimits: { x: [-2, 2], y: [-2, 2], z: [-2, 2] }
       }
     ];
 
@@ -1577,6 +1577,7 @@ const renderTrajectories = (result) => {
     syncLimits();
     syncWeight(50);
     document.getElementById("randomize-all").click();
+    runSimulation();
     }
   </script>
 
