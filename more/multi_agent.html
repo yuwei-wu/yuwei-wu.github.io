@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Motion Planning - Multi-Agent Path Planning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive multi-agent path planning demo: tweak objectives, visualize agent interactions, and compare trajectories." />
+  <meta property="og:title" content="Motion Planning: Multi-Agent Path Planning" />
+  <meta property="og:description" content="Coordinate teams of agents through constrained environments while tuning objectives and disturbances." />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700&display=swap");
+
+    :root {
+      font-family: "Lato", Arial, sans-serif;
+      --bg: #f7f7fc;
+      --panel: #ffffff;
+      --accent: #3c2a4d;
+      --border: rgba(60, 42, 77, 0.12);
+      --hero-gradient-start: #284d6d;
+      --hero-gradient-mid: #1c7f99;
+      --hero-gradient-end: #4bb8c5;
+      --hero-text: #f8f2ff;
+      --hero-shadow: rgba(30, 60, 90, 0.35);
+      --canvas-grid-light: rgba(60, 42, 77, 0.08);
+      --canvas-grid-dark: rgba(60, 42, 77, 0.02);
+      --canvas-border: rgba(60, 42, 77, 0.2);
+      --panel-shadow: rgba(60, 42, 77, 0.22);
+      --panel-whiten: rgba(255, 255, 255, 0.92);
+      --control-border: rgba(60, 42, 77, 0.2);
+      --control-text-muted: rgba(60, 42, 77, 0.6);
+      --status-bg: rgba(60, 42, 77, 0.05);
+      --status-border: rgba(60, 42, 77, 0.2);
+      --footer-text: rgba(60, 42, 77, 0.65);
+      --control-button-bg: #f3f1ff;
+      --env-active-bg: #3c2a4d;
+      --env-active-text: #f8f2ff;
+      --canvas-fill: #fefefe;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Lato", Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--accent);
+    }
+
+    header.hero {
+      background: linear-gradient(
+        135deg,
+        var(--hero-gradient-start),
+        var(--hero-gradient-mid),
+        var(--hero-gradient-end)
+      );
+      color: var(--hero-text);
+      padding: 24px 32px;
+      box-shadow: 0 18px 35px var(--hero-shadow);
+    }
+
+    header.hero h1 {
+      font-size: 22px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    header.hero p {
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 32px auto;
+      padding: 0 24px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .demo-area {
+      border-radius: 24px;
+      background: var(--panel);
+      padding: 32px;
+      box-shadow: 0 20px 40px var(--panel-shadow);
+      border: 1px solid var(--border);
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .demo-area .canvas-placeholder {
+      flex: 1;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--canvas-grid-light), var(--canvas-grid-dark));
+      border: 1px dashed var(--canvas-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(60, 42, 77, 0.5);
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .control-card {
+      border-radius: 16px;
+      background: var(--panel-whiten);
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 24px rgba(60, 42, 77, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-card button,
+    .control-card select {
+      background: var(--control-button-bg);
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid var(--control-border);
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      font-family: "Lato", Arial, sans-serif;
+    }
+
+    .env-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .env-buttons button {
+      flex: 1;
+    }
+
+    .env-buttons button.active {
+      background: var(--env-active-bg);
+      color: var(--env-active-text);
+    }
+
+    .control-card small {
+      color: var(--control-text-muted);
+    }
+
+    .status-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--status-border);
+      background: var(--status-bg);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--footer-text);
+      font-size: 0.9rem;
+    }
+
+    .canvas-placeholder canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1>Multi-Agent Path Planning</h1>
+    <p> Coordinate teams of agents while tuning collisions, costs, and timing.</p>
+  </header>
+  <main>
+      <section class="demo-area">
+      <div class="canvas-placeholder">
+        <canvas id="gridCanvas" width="940" height="400"></canvas>
+      </div>
+      <div class="controls-grid">
+        <div class="control-card">
+          <strong>Agent Count</strong>
+          <small>Toggle number of agents participating.</small>
+          <input id="agentCount" type="range" min="2" max="12" value="3" />
+          <span id="agentCountLabel">3 agents</span>
+        </div>
+        <div class="control-card">
+          <strong>Objective</strong>
+          <small>Balance safety, smoothness, and makespan.</small>
+          <select>
+            <option>Min total time</option>
+            <option>Min corridor risk</option>
+            <option>Balanced energy</option>
+          </select>
+        </div>
+        <div class="control-card">
+          <strong>Environment</strong>
+          <small>Swap between cluttered and open.</small>
+          <div class="env-buttons">
+            <button id="clutterBtn" type="button" class="active">Cluttered</button>
+            <button id="openBtn" type="button">Open field</button>
+          </div>
+          <button id="shuffleCorridor" type="button">Shuffle Corridor</button>
+        </div>
+        <div class="control-card">
+          <strong>Disturbance</strong>
+          <small>Inject randomness into the replanned trajectories.</small>
+          <input id="disturbanceLevel" type="range" min="0" max="0.5" step="0.05" value="0.15" />
+          <span id="disturbanceLabel">15% disturbance</span>
+        </div>
+        <div class="control-card">
+          <strong>Simulation</strong>
+          <small>Replay the active trajectories.</small>
+          <button id="runSimulation" type="button">Run Simulation</button>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-pill" id="status-env">Env: cluttered</span>
+        <span class="status-pill" id="status-agents">Agents: 3</span>
+        <span class="status-pill" id="status-path">Longest path: 0 steps</span>
+        <span class="status-pill" id="status-disturb">Disturbance: 15%</span>
+      </div>
+    </section>
+  </main>
+  <footer style="text-align:center;padding:16px 0;">
+    <p style="margin:0;">© 2025 Yuwei Wu | With the assistance of GPT</p>
+  </footer>
+  <script>
+    const canvas = document.getElementById("gridCanvas");
+    const ctx = canvas.getContext("2d");
+    const rootStyles = getComputedStyle(document.documentElement);
+    const canvasFill = rootStyles.getPropertyValue("--canvas-fill").trim() || "#fefefe";
+    const cols = 20;
+    const rows = 12;
+    const environments = {
+      cluttered: [
+        { x: 6, y: 3, w: 2, h: 5 },
+        { x: 12, y: 1, w: 3, h: 3 },
+        { x: 15, y: 6, w: 2, h: 4 }
+      ],
+      open: []
+    };
+    let obstacles = environments.cluttered;
+    const agentPresets = [
+      { start: { x: 1, y: 1 }, goal: { x: 18, y: 10 } },
+      { start: { x: 3, y: 10 }, goal: { x: 16, y: 2 } },
+      { start: { x: 0, y: 7 }, goal: { x: 14, y: 7 } },
+      { start: { x: 5, y: 0 }, goal: { x: 5, y: 11 } },
+      { start: { x: 9, y: 2 }, goal: { x: 2, y: 8 } },
+      { start: { x: 11, y: 9 }, goal: { x: 18, y: 4 } },
+      { start: { x: 2, y: 4 }, goal: { x: 17, y: 1 } },
+      { start: { x: 4, y: 8 }, goal: { x: 10, y: 3 } }
+    ];
+    const colors = ["#ec4899", "#22d3ee", "#5eead4", "#facc15", "#a78bfa", "#fb7185", "#34d399"];
+    const slider = document.getElementById("agentCount");
+    const label = document.getElementById("agentCountLabel");
+    const runButton = document.getElementById("runSimulation");
+    const clutterBtn = document.getElementById("clutterBtn");
+    const openBtn = document.getElementById("openBtn");
+    const shuffleBtn = document.getElementById("shuffleCorridor");
+    const disturbanceInput = document.getElementById("disturbanceLevel");
+    const disturbanceLabel = document.getElementById("disturbanceLabel");
+    const statusEnv = document.getElementById("status-env");
+    const statusAgents = document.getElementById("status-agents");
+    const statusPath = document.getElementById("status-path");
+    const statusDisturb = document.getElementById("status-disturb");
+    let currentEnv = "cluttered";
+    let currentAgentCount = Number(slider.value);
+    let currentAgents = buildAgents(currentAgentCount);
+    let agentPaths = [];
+    let disturbanceLevel = Number(disturbanceInput.value);
+    let isSimulating = false;
+    let simulationProgress = 0;
+    let animationFrameId;
+    function buildAgents(count) {
+      return Array.from({ length: count }, (_, idx) => agentPresets[idx % agentPresets.length]);
+    }
+    function buildOccupancy() {
+      const grid = new Set();
+      obstacles.forEach(obs => {
+        for (let x = obs.x; x < obs.x + obs.w; x++) {
+          for (let y = obs.y; y < obs.y + obs.h; y++) {
+            grid.add(`${x},${y}`);
+          }
+        }
+      });
+      return grid;
+    }
+    function findPath(start, goal, occupancy) {
+      const startKey = `${start.x},${start.y}`;
+      const goalKey = `${goal.x},${goal.y}`;
+      if (startKey === goalKey) return [start];
+      const queue = [{ x: start.x, y: start.y }];
+      const prev = new Map();
+      prev.set(startKey, null);
+      const directions = [
+        { dx: 1, dy: 0 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 0, dy: -1 }
+      ];
+      while (queue.length) {
+        const node = queue.shift();
+        const nodeKey = `${node.x},${node.y}`;
+        if (nodeKey === goalKey) {
+          const path = [];
+          let current = nodeKey;
+          while (current) {
+            const [cx, cy] = current.split(",").map(Number);
+            path.push({ x: cx, y: cy });
+            current = prev.get(current);
+          }
+          return path.reverse();
+        }
+        directions.forEach(dir => {
+          const nx = node.x + dir.dx;
+          const ny = node.y + dir.dy;
+          const key = `${nx},${ny}`;
+          if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return;
+          if (occupancy.has(key)) return;
+          if (prev.has(key)) return;
+          prev.set(key, nodeKey);
+          queue.push({ x: nx, y: ny });
+        });
+      }
+      return [start, goal];
+    }
+    function computePaths() {
+      const occupancy = buildOccupancy();
+      agentPaths = currentAgents.map(agent => findPath(agent.start, agent.goal, occupancy));
+      updateStatus();
+    }
+    function updateStatus() {
+      const longestPath = Math.max(
+        1,
+        ...agentPaths.map(path => Math.max(0, path.length - 1))
+      );
+      statusEnv.textContent = `Env: ${currentEnv}`;
+      statusAgents.textContent = `Agents: ${currentAgentCount}`;
+      statusPath.textContent = `Longest path: ${longestPath} steps`;
+      statusDisturb.textContent = `Disturbance: ${(disturbanceLevel * 100).toFixed(0)}%`;
+    }
+    function randomObstacle() {
+      const w = 2 + Math.floor(Math.random() * 3);
+      const h = 3 + Math.floor(Math.random() * 4);
+      const x = Math.max(0, Math.min(cols - w, Math.floor(Math.random() * cols)));
+      const y = Math.max(0, Math.min(rows - h, Math.floor(Math.random() * rows)));
+      return { x, y, w, h };
+    }
+    function shuffleCorridor() {
+      environments.cluttered = Array.from({ length: 3 }, () => randomObstacle());
+      if (currentEnv === "cluttered") {
+        setEnvironment("cluttered");
+      }
+    }
+    function drawGrid(progress = null, disturbance = 0) {
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = canvasFill;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "rgba(60, 42, 77, 0.15)";
+      ctx.lineWidth = 1;
+      for (let c = 0; c <= cols; c++) {
+        const x = c * cellW;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let r = 0; r <= rows; r++) {
+        const y = r * cellH;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "rgba(60, 42, 77, 0.2)";
+      obstacles.forEach(obs => {
+        ctx.fillRect(obs.x * cellW, obs.y * cellH, obs.w * cellW, obs.h * cellH);
+      });
+      currentAgents.forEach((agent, index) => {
+        const color = colors[index % colors.length];
+        const path = agentPaths[index] || [agent.start, agent.goal];
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        path.forEach((pt, idx) => {
+          const cx = pt.x * cellW + cellW / 2;
+          const cy = pt.y * cellH + cellH / 2;
+          if (idx === 0) {
+            ctx.moveTo(cx, cy);
+          } else {
+            ctx.lineTo(cx, cy);
+          }
+        });
+        ctx.stroke();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(agent.start.x * cellW + cellW / 2, agent.start.y * cellH + cellH / 2, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(agent.goal.x * cellW + cellW / 2, agent.goal.y * cellH + cellH / 2, 6, 0, Math.PI * 2);
+        ctx.fill();
+        if (progress !== null && path.length > 1) {
+          const steps = path.length - 1;
+          const totalProgress = Math.min(1, progress) * steps;
+          const segmentIndex = Math.min(steps - 1, Math.floor(totalProgress));
+          const segmentProgress = totalProgress - segmentIndex;
+          const startPoint = path[segmentIndex];
+          const endPoint = path[segmentIndex + 1];
+          const px = startPoint.x + (endPoint.x - startPoint.x) * segmentProgress;
+          const py = startPoint.y + (endPoint.y - startPoint.y) * segmentProgress;
+          const jitterX = (Math.random() - 0.5) * disturbance * cellW;
+          const jitterY = (Math.random() - 0.5) * disturbance * cellH;
+          const cx = px * cellW + cellW / 2 + jitterX;
+          const cy = py * cellH + cellH / 2 + jitterY;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+    function animate() {
+      drawGrid(simulationProgress, disturbanceLevel);
+      if (simulationProgress >= 1) {
+        isSimulating = false;
+        runButton.disabled = false;
+        runButton.textContent = "Run Simulation";
+        return;
+      }
+      simulationProgress = Math.min(1, simulationProgress + 0.02);
+      animationFrameId = requestAnimationFrame(animate);
+    }
+    slider.addEventListener("input", () => {
+      currentAgentCount = Number(slider.value);
+      currentAgents = buildAgents(currentAgentCount);
+      computePaths();
+      label.textContent = `${currentAgentCount} agent${currentAgentCount > 1 ? "s" : ""}`;
+      if (isSimulating) {
+        isSimulating = false;
+        runButton.textContent = "Run Simulation";
+        runButton.disabled = false;
+        cancelAnimationFrame(animationFrameId);
+      }
+      drawGrid();
+    });
+    disturbanceInput.addEventListener("input", () => {
+      disturbanceLevel = Number(disturbanceInput.value);
+      disturbanceLabel.textContent = `${Math.round(disturbanceLevel * 100)}% disturbance`;
+      updateStatus();
+    });
+    runButton.addEventListener("click", () => {
+      if (isSimulating) return;
+      simulationProgress = 0;
+      isSimulating = true;
+      runButton.disabled = true;
+      runButton.textContent = "Running...";
+      animate();
+    });
+    function setEnvironment(env) {
+      currentEnv = env;
+      obstacles = environments[env];
+      clutterBtn.classList.toggle("active", env === "cluttered");
+      openBtn.classList.toggle("active", env === "open");
+      computePaths();
+      drawGrid();
+    }
+    clutterBtn.addEventListener("click", () => setEnvironment("cluttered"));
+    openBtn.addEventListener("click", () => setEnvironment("open"));
+    shuffleBtn.addEventListener("click", () => shuffleCorridor());
+    label.textContent = `${currentAgentCount} agent${currentAgentCount > 1 ? "s" : ""}`;
+    disturbanceLabel.textContent = `${Math.round(disturbanceLevel * 100)}% disturbance`;
+    setEnvironment("cluttered");
+  </script>
+</body>
+</html>
