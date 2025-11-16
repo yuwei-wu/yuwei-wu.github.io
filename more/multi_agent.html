@@ -58,8 +58,31 @@
         var(--hero-gradient-end)
       );
       color: var(--hero-text);
-      padding: 24px 32px;
+      padding: 16px 28px;
       box-shadow: 0 18px 35px var(--hero-shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header-copy {
+      flex: 1;
+      min-width: 200px;
+    }
+    .back-home {
+      background: #ffffff;
+      color: var(--accent);
+      border-radius: 10px;
+      padding: 10px 16px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 1px solid rgba(60, 42, 77, 0.2);
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .back-home:hover {
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateY(-1px);
     }
 
     header.hero h1 {
@@ -185,8 +208,11 @@
 </head>
 <body>
   <header class="hero">
-    <h1>Multi-Agent Path Planning</h1>
-    <p> Coordinate teams of agents while tuning collisions, costs, and timing.</p>
+    <div class="header-copy">
+      <h1>Multi-Agent Path Planning</h1>
+      <p> Coordinate teams of agents while tuning collisions, costs, and timing.</p>
+    </div>
+    <a class="back-home" href="../index.html">Back to homepage</a>
   </header>
   <main>
       <section class="demo-area">

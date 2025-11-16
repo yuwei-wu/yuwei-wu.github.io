@@ -87,6 +87,29 @@
             background: linear-gradient(135deg, #3c2a4d 0%, #4f3c62 55%, #6c4c80 100%);
             color: #f8f2ff;
             box-shadow: 0 18px 35px rgba(60, 42, 77, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-copy {
+            flex: 1;
+            min-width: 200px;
+        }
+        .back-home {
+            background: #ffffff;
+            color: #3c2a4d;
+            border-radius: 10px;
+            padding: 10px 16px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(60, 42, 77, 0.2);
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .back-home:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateY(-1px);
         }
 
         header.hero h1 {
@@ -683,8 +706,11 @@
 </head>
 <body>
     <header class="hero">
-        <h1>Minimum Snap Trajectory</h1>
-        <p>Design smooth multi-waypoint paths and observe drone movements in real time.</p>
+        <div class="header-copy">
+            <h1>Minimum Snap Trajectory</h1>
+            <p>Design smooth multi-waypoint paths and observe drone movements in real time.</p>
+        </div>
+        <a class="back-home" href="../index.html">Back to homepage</a>
     </header>
     <div id="canvas-wrapper">
         <div id="container">

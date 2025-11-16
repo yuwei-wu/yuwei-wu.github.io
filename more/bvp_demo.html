@@ -34,6 +34,29 @@
       color: var(--macaron-ink);
       padding: 16px 28px;
       margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header-copy {
+      flex: 1;
+      min-width: 200px;
+    }
+    .back-home {
+      background: #ffffff;
+      color: var(--macaron-ink);
+      border-radius: 10px;
+      padding: 10px 16px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 1px solid rgba(60, 42, 77, 0.2);
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .back-home:hover {
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateY(-1px);
     }
     main {
       padding: 32px;
@@ -408,8 +431,11 @@
 </head>
 <body>
   <header>
-    <h1>Time-Optimal Boundary Value Problem</h1>
-    <p class="subtitle">An interactive demo for time-optimal trajectory optimization with different dynamic limits, boundary conditions, weights, and preview feasibility.</p>
+    <div class="header-copy">
+      <h1>Time-Optimal Boundary Value Problem</h1>
+      <p class="subtitle">An interactive demo for time-optimal trajectory optimization with different dynamic limits, boundary conditions, weights, and preview feasibility.</p>
+    </div>
+    <a class="back-home" href="../index.html">Back to homepage</a>
   </header>
   <main>
     <section class="panel">
