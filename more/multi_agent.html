@@ -197,16 +197,16 @@
         <div class="control-card">
           <strong>Agent Count</strong>
           <small>Toggle number of agents participating.</small>
-          <input id="agentCount" type="range" min="2" max="12" value="3" />
-          <span id="agentCountLabel">3 agents</span>
+          <input id="agentCount" type="range" min="2" max="12" value="5" />
+          <span id="agentCountLabel">5 agents</span>
         </div>
         <div class="control-card">
           <strong>Objective</strong>
           <small>Balance safety, smoothness, and makespan.</small>
-          <select>
-            <option>Min total time</option>
-            <option>Min corridor risk</option>
-            <option>Balanced energy</option>
+          <select id="objectiveSelect">
+            <option value="time">Min total time</option>
+            <option value="risk">Min corridor risk</option>
+            <option value="balanced">Balanced energy</option>
           </select>
         </div>
         <div class="control-card">
@@ -234,6 +234,7 @@
         <span class="status-pill" id="status-env">Env: cluttered</span>
         <span class="status-pill" id="status-agents">Agents: 3</span>
         <span class="status-pill" id="status-path">Longest path: 0 steps</span>
+        <span class="status-pill" id="status-objective">Objective: Min total time</span>
         <span class="status-pill" id="status-disturb">Disturbance: 15%</span>
       </div>
     </section>
@@ -246,26 +247,29 @@
     const ctx = canvas.getContext("2d");
     const rootStyles = getComputedStyle(document.documentElement);
     const canvasFill = rootStyles.getPropertyValue("--canvas-fill").trim() || "#fefefe";
-    const cols = 20;
-    const rows = 12;
+    const cols = 30;
+    const rows = 20;
+    const maxGridDistance = cols + rows;
     const environments = {
       cluttered: [
-        { x: 6, y: 3, w: 2, h: 5 },
-        { x: 12, y: 1, w: 3, h: 3 },
-        { x: 15, y: 6, w: 2, h: 4 }
+        { x: 4, y: 4, w: 5, h: 4 },
+        { x: 14, y: 3, w: 3, h: 7 },
+        { x: 20, y: 8, w: 5, h: 5 },
+        { x: 2, y: 14, w: 6, h: 4 },
+        { x: 25, y: 3, w: 4, h: 10 }
       ],
       open: []
     };
     let obstacles = environments.cluttered;
     const agentPresets = [
-      { start: { x: 1, y: 1 }, goal: { x: 18, y: 10 } },
-      { start: { x: 3, y: 10 }, goal: { x: 16, y: 2 } },
-      { start: { x: 0, y: 7 }, goal: { x: 14, y: 7 } },
-      { start: { x: 5, y: 0 }, goal: { x: 5, y: 11 } },
-      { start: { x: 9, y: 2 }, goal: { x: 2, y: 8 } },
-      { start: { x: 11, y: 9 }, goal: { x: 18, y: 4 } },
-      { start: { x: 2, y: 4 }, goal: { x: 17, y: 1 } },
-      { start: { x: 4, y: 8 }, goal: { x: 10, y: 3 } }
+      { start: { x: 1, y: 1 }, goal: { x: 28, y: 18 } },
+      { start: { x: 2, y: 18 }, goal: { x: 27, y: 2 } },
+      { start: { x: 5, y: 3 }, goal: { x: 23, y: 13 } },
+      { start: { x: 8, y: 0 }, goal: { x: 8, y: 19 } },
+      { start: { x: 0, y: 10 }, goal: { x: 17, y: 6 } },
+      { start: { x: 18, y: 16 }, goal: { x: 29, y: 4 } },
+      { start: { x: 7, y: 3 }, goal: { x: 22, y: 17 } },
+      { start: { x: 11, y: 5 }, goal: { x: 3, y: 16 } }
     ];
     const colors = ["#ec4899", "#22d3ee", "#5eead4", "#facc15", "#a78bfa", "#fb7185", "#34d399"];
     const slider = document.getElementById("agentCount");
@@ -279,7 +283,9 @@
     const statusEnv = document.getElementById("status-env");
     const statusAgents = document.getElementById("status-agents");
     const statusPath = document.getElementById("status-path");
+    const statusObjective = document.getElementById("status-objective");
     const statusDisturb = document.getElementById("status-disturb");
+    const objectiveSelect = document.getElementById("objectiveSelect");
     let currentEnv = "cluttered";
     let currentAgentCount = Number(slider.value);
     let currentAgents = buildAgents(currentAgentCount);
@@ -288,8 +294,44 @@
     let isSimulating = false;
     let simulationProgress = 0;
     let animationFrameId;
+    let currentObjective = objectiveSelect.value;
+    function findNearestFreeCell(point, occupancy) {
+      const key = `${point.x},${point.y}`;
+      if (!occupancy.has(key)) return { ...point };
+      const queue = [{ x: point.x, y: point.y }];
+      const visited = new Set([key]);
+      const directions = [
+        { dx: 1, dy: 0 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 0, dy: -1 }
+      ];
+      while (queue.length) {
+        const { x, y } = queue.shift();
+        for (const dir of directions) {
+          const nx = x + dir.dx;
+          const ny = y + dir.dy;
+          const nextKey = `${nx},${ny}`;
+          if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+          if (visited.has(nextKey)) continue;
+          visited.add(nextKey);
+          if (!occupancy.has(nextKey)) {
+            return { x: nx, y: ny };
+          }
+          queue.push({ x: nx, y: ny });
+        }
+      }
+      return { ...point };
+    }
     function buildAgents(count) {
-      return Array.from({ length: count }, (_, idx) => agentPresets[idx % agentPresets.length]);
+      const occupancy = buildOccupancy();
+      return Array.from({ length: count }, (_, idx) => {
+        const preset = agentPresets[idx % agentPresets.length];
+        return {
+          start: findNearestFreeCell(preset.start, occupancy),
+          goal: findNearestFreeCell(preset.goal, occupancy)
+        };
+      });
     }
     function buildOccupancy() {
       const grid = new Set();
@@ -302,48 +344,102 @@
       });
       return grid;
     }
-    function findPath(start, goal, occupancy) {
-      const startKey = `${start.x},${start.y}`;
-      const goalKey = `${goal.x},${goal.y}`;
-      if (startKey === goalKey) return [start];
-      const queue = [{ x: start.x, y: start.y }];
-      const prev = new Map();
-      prev.set(startKey, null);
+    function buildRiskMap(occupancy) {
+      const map = new Map();
+      const queue = [];
       const directions = [
         { dx: 1, dy: 0 },
         { dx: -1, dy: 0 },
         { dx: 0, dy: 1 },
         { dx: 0, dy: -1 }
       ];
+      occupancy.forEach(coord => {
+        const [x, y] = coord.split(",").map(Number);
+        map.set(coord, 0);
+        queue.push({ x, y, dist: 0 });
+      });
       while (queue.length) {
-        const node = queue.shift();
-        const nodeKey = `${node.x},${node.y}`;
+        const { x, y, dist } = queue.shift();
+        directions.forEach(dir => {
+          const nx = x + dir.dx;
+          const ny = y + dir.dy;
+          if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return;
+          const key = `${nx},${ny}`;
+          if (map.has(key)) return;
+          map.set(key, dist + 1);
+          queue.push({ x: nx, y: ny, dist: dist + 1 });
+        });
+      }
+      for (let x = 0; x < cols; x++) {
+        for (let y = 0; y < rows; y++) {
+          const key = `${x},${y}`;
+          if (!map.has(key)) {
+            map.set(key, maxGridDistance);
+          }
+        }
+      }
+      return map;
+    }
+    function findPath(start, goal, occupancy, objective, riskMap) {
+      const startKey = `${start.x},${start.y}`;
+      const goalKey = `${goal.x},${goal.y}`;
+      if (startKey === goalKey) return [start];
+      const directions = [
+        { dx: 1, dy: 0 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 0, dy: -1 }
+      ];
+      const frontier = [{ x: start.x, y: start.y, priority: 0 }];
+      const prev = new Map([[startKey, null]]);
+      const costSoFar = new Map([[startKey, 0]]);
+      const baseTimeWeight = objective === "risk" ? 0.2 : objective === "balanced" ? 0.6 : 1;
+      while (frontier.length) {
+        frontier.sort((a, b) => a.priority - b.priority);
+        const current = frontier.shift();
+        const nodeKey = `${current.x},${current.y}`;
         if (nodeKey === goalKey) {
           const path = [];
-          let current = nodeKey;
-          while (current) {
-            const [cx, cy] = current.split(",").map(Number);
+          let cursor = nodeKey;
+          while (cursor) {
+            const [cx, cy] = cursor.split(",").map(Number);
             path.push({ x: cx, y: cy });
-            current = prev.get(current);
+            cursor = prev.get(cursor);
           }
           return path.reverse();
         }
+        const currentCost = costSoFar.get(nodeKey) ?? 0;
         directions.forEach(dir => {
-          const nx = node.x + dir.dx;
-          const ny = node.y + dir.dy;
+          const nx = current.x + dir.dx;
+          const ny = current.y + dir.dy;
           const key = `${nx},${ny}`;
           if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return;
           if (occupancy.has(key)) return;
-          if (prev.has(key)) return;
-          prev.set(key, nodeKey);
-          queue.push({ x: nx, y: ny });
+          const safetyDistance = riskMap.get(key) ?? maxGridDistance;
+          let riskPenalty = 0;
+          if (objective === "risk") {
+            riskPenalty = (maxGridDistance - safetyDistance) / maxGridDistance;
+          } else if (objective === "balanced") {
+            riskPenalty = ((maxGridDistance - safetyDistance) / maxGridDistance) * 0.5;
+          }
+          const newCost = currentCost + 1 + riskPenalty;
+          if (!costSoFar.has(key) || newCost < costSoFar.get(key)) {
+            costSoFar.set(key, newCost);
+            prev.set(key, nodeKey);
+            const manhattan = Math.abs(nx - goal.x) + Math.abs(ny - goal.y);
+            const priority = newCost + manhattan * baseTimeWeight;
+            frontier.push({ x: nx, y: ny, priority });
+          }
         });
       }
       return [start, goal];
     }
     function computePaths() {
       const occupancy = buildOccupancy();
-      agentPaths = currentAgents.map(agent => findPath(agent.start, agent.goal, occupancy));
+      const riskMap = buildRiskMap(occupancy);
+      agentPaths = currentAgents.map(agent =>
+        findPath(agent.start, agent.goal, occupancy, currentObjective, riskMap)
+      );
       updateStatus();
     }
     function updateStatus() {
@@ -355,6 +451,7 @@
       statusAgents.textContent = `Agents: ${currentAgentCount}`;
       statusPath.textContent = `Longest path: ${longestPath} steps`;
       statusDisturb.textContent = `Disturbance: ${(disturbanceLevel * 100).toFixed(0)}%`;
+      statusObjective.textContent = `Objective: ${objectiveSelect.options[objectiveSelect.selectedIndex].text}`;
     }
     function randomObstacle() {
       const w = 2 + Math.floor(Math.random() * 3);
@@ -365,9 +462,7 @@
     }
     function shuffleCorridor() {
       environments.cluttered = Array.from({ length: 3 }, () => randomObstacle());
-      if (currentEnv === "cluttered") {
-        setEnvironment("cluttered");
-      }
+      setEnvironment("cluttered");
     }
     function drawGrid(progress = null, disturbance = 0) {
       const cellW = canvas.width / cols;
@@ -402,8 +497,10 @@
         ctx.lineWidth = 3;
         ctx.beginPath();
         path.forEach((pt, idx) => {
-          const cx = pt.x * cellW + cellW / 2;
-          const cy = pt.y * cellH + cellH / 2;
+          const jitterX = (Math.random() - 0.5) * disturbance * cellW;
+          const jitterY = (Math.random() - 0.5) * disturbance * cellH;
+          const cx = pt.x * cellW + cellW / 2 + jitterX;
+          const cy = pt.y * cellH + cellH / 2 + jitterY;
           if (idx === 0) {
             ctx.moveTo(cx, cy);
           } else {
@@ -412,11 +509,21 @@
         });
         ctx.stroke();
         ctx.fillStyle = color;
+        const startJitterX = (Math.random() - 0.5) * disturbance * cellW;
+        const startJitterY = (Math.random() - 0.5) * disturbance * cellH;
         ctx.beginPath();
-        ctx.arc(agent.start.x * cellW + cellW / 2, agent.start.y * cellH + cellH / 2, 8, 0, Math.PI * 2);
+        ctx.arc(agent.start.x * cellW + cellW / 2 + startJitterX, agent.start.y * cellH + cellH / 2 + startJitterY, 8, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(agent.goal.x * cellW + cellW / 2, agent.goal.y * cellH + cellH / 2, 6, 0, Math.PI * 2);
+        const goalJitterX = (Math.random() - 0.5) * disturbance * cellW;
+        const goalJitterY = (Math.random() - 0.5) * disturbance * cellH;
+        ctx.arc(
+          agent.goal.x * cellW + cellW / 2 + goalJitterX,
+          agent.goal.y * cellH + cellH / 2 + goalJitterY,
+          6,
+          0,
+          Math.PI * 2
+        );
         ctx.fill();
         if (progress !== null && path.length > 1) {
           const steps = path.length - 1;
@@ -456,23 +563,39 @@
       simulationProgress = Math.min(1, simulationProgress + 0.02);
       animationFrameId = requestAnimationFrame(animate);
     }
+    function resetSimulation() {
+      if (isSimulating) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      isSimulating = false;
+      simulationProgress = 0;
+      runButton.disabled = false;
+      runButton.textContent = "Run Simulation";
+    }
     slider.addEventListener("input", () => {
       currentAgentCount = Number(slider.value);
       currentAgents = buildAgents(currentAgentCount);
       computePaths();
       label.textContent = `${currentAgentCount} agent${currentAgentCount > 1 ? "s" : ""}`;
-      if (isSimulating) {
-        isSimulating = false;
-        runButton.textContent = "Run Simulation";
-        runButton.disabled = false;
-        cancelAnimationFrame(animationFrameId);
+      resetSimulation();
+      if (!isSimulating) {
+        drawGrid(null, disturbanceLevel);
       }
-      drawGrid();
+    });
+    objectiveSelect.addEventListener("change", () => {
+      currentObjective = objectiveSelect.value;
+      computePaths();
+      if (!isSimulating) {
+        drawGrid(null, disturbanceLevel);
+      }
     });
     disturbanceInput.addEventListener("input", () => {
       disturbanceLevel = Number(disturbanceInput.value);
       disturbanceLabel.textContent = `${Math.round(disturbanceLevel * 100)}% disturbance`;
       updateStatus();
+      if (!isSimulating) {
+        drawGrid(null, disturbanceLevel);
+      }
     });
     runButton.addEventListener("click", () => {
       if (isSimulating) return;
@@ -483,12 +606,17 @@
       animate();
     });
     function setEnvironment(env) {
+      resetSimulation();
       currentEnv = env;
-      obstacles = environments[env];
+      const envConfig = environments[env] || [];
+      obstacles = envConfig.map(obs => ({ ...obs }));
+      currentAgents = buildAgents(currentAgentCount);
       clutterBtn.classList.toggle("active", env === "cluttered");
       openBtn.classList.toggle("active", env === "open");
       computePaths();
-      drawGrid();
+      if (!isSimulating) {
+        drawGrid(null, disturbanceLevel);
+      }
     }
     clutterBtn.addEventListener("click", () => setEnvironment("cluttered"));
     openBtn.addEventListener("click", () => setEnvironment("open"));
