@@ -1974,7 +1974,8 @@
             Plotly.react('acc-chart', makeTraces(accSeries), layout('Acceleration (m/s²)'));
         }
 
-        function addIntermediatePoint(x = 1.5, y = 1.5, z = 1.5) {
+        function addIntermediatePoint(x = 1.5, y = 1.5, z = 1.5, options = {}) {
+            const { runTrajectory = true } = options || {};
             const idx = intermediatePointCounter++;
             const list = document.getElementById('intermediate-points-list');
             
@@ -2008,6 +2009,9 @@
             
             list.appendChild(pointDiv);
             updateVisualization();
+            if (runTrajectory) {
+                generateTrajectory();
+            }
         }
 
         function removeIntermediatePoint(idx) {
@@ -2028,7 +2032,7 @@
                 const x = (Math.random() * 6 - 3).toFixed(1); // -3 to 3
                 const y = (Math.random() * 6 - 3).toFixed(1); // -3 to 3
                 const z = (Math.random() * 3 + 1).toFixed(1);  // 1 to 4
-                addIntermediatePoint(parseFloat(x), parseFloat(y), parseFloat(z));
+                addIntermediatePoint(parseFloat(x), parseFloat(y), parseFloat(z), { runTrajectory: false });
             }
             
             // Auto-generate trajectory
@@ -2197,7 +2201,7 @@
             window.removeIntermediatePoint = removeIntermediatePoint;
 
             // Add a sample intermediate point for demonstration
-            addIntermediatePoint(1.5, 1.5, 1.5);
+            addIntermediatePoint(1.5, 1.5, 1.5, { runTrajectory: false });
             
             // Initial visualization
             updateVisualization();

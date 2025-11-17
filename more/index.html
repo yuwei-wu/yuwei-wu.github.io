@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Additional Links</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Secondary landing page with quick buttons to workshop info and interactive demos." />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap");
+    :root {
+      font-family: "Lato", Arial, sans-serif;
+      --hero-start: #28314d;
+      --hero-mid: #4d3d6f;
+      --hero-end: #8661a2;
+      --text-muted: rgba(60, 42, 77, 0.7);
+      --panel: #ffffff;
+      --border-light: rgba(255, 255, 255, 0.35);
+      --accent: #f9d36c;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      padding-top: 88px;
+      background: #f5f6fa;
+      color: #1d1f26;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 960px;
+      margin: 12px auto 32px;
+      padding: 0 16px 24px;
+    }
+    .page-section {
+      margin-top: 20px;
+    }
+    .section-heading {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(60, 42, 77, 0.6);
+      margin-bottom: 12px;
+    }
+    .button-row {
+      display: grid;
+      gap: 12px;
+    }
+    .demo-grid {
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+    }
+    .more-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      justify-content: center;
+    }
+    .resource-card {
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(60, 42, 77, 0.08);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 150px;
+      box-shadow: 0 8px 18px rgba(60, 42, 77, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px rgba(60, 42, 77, 0.15);
+    }
+    .resource-card h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+    .resource-card p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .resource-card .button-signal {
+      margin-top: auto;
+      align-self: flex-start;
+      background: #8b5cf6;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    footer {
+      text-align: center;
+      padding: 24px 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .demo-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+    }
+    @media (max-width: 640px) {
+      .demo-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-xl navbar-custom fixed-top">
+    <img class="Logo" src="../img/logo.png" type="32x32" alt="logo" />
+    <div class="navbar-brand">
+      <strong class="name-bold">Yuwei Wu&nbsp;</strong> | Planning, Optimization, and Learning For Autonomy
+    </div>
+    <button class="navbar-toggler border" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <i class="fas fa-bars" style="color: #757575;"></i>
+      <span style="color: #757575;">Menu</span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item active"><a class="nav-link" href="../">About</a></li>
+        <li class="nav-item active"><a class="nav-link" href="../publications/">Publications</a></li>
+        <li class="nav-item active"><a class="nav-link" href="../experience/">Experience</a></li>
+        <li class="nav-item active"><a class="nav-link" href="../contact/">Contact</a></li>
+        <li class="nav-item active"><a class="nav-link" href="../Yuwei_Resume.pdf">CV</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarMore" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            More
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarMore">
+            <a class="dropdown-item" href="./">More page</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="https://im4rob.github.io/" target="_blank">RSS25 Workshop</a>
+            <a class="dropdown-item" href="./bvp_demo.html">BVP demo</a>
+            <a class="dropdown-item" href="./min_snap.html">Min snap demo</a>
+            <a class="dropdown-item" href="./multi_agent.html">Multi-Agent demo</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <main>
+    <div class="page-section">
+      <div class="section-heading">Demos</div>
+      <div class="button-row demo-grid">
+        <a class="resource-card" href="./bvp_demo.html">
+          <h2>Time-Optimal BVP Demo</h2>
+          <p>An interactive demo for time-optimal trajectory optimization with different dynamic limits, boundary conditions, weights, and preview feasibility.</p>
+          <span class="button-signal">Launch demo</span>
+        </a>
+        <a class="resource-card" href="./min_snap.html">
+          <h2>Minimum Snap Demo</h2>
+          <p>Design smooth multi-waypoint paths and observe drone movements in real time.</p>
+          <span class="button-signal">Launch demo</span>
+        </a>
+        <a class="resource-card" href="./multi_agent.html">
+          <h2>Multi-Agent Path Planning</h2>
+          <p>Coordinate teams of agents while tuning collisions, costs, and timing.</p>
+          <span class="button-signal">Launch demo</span>
+        </a>
+      </div>
+    </div>
+    <div class="page-section">
+      <div class="section-heading">More</div>
+      <div class="button-row more-grid">
+        <a class="resource-card" href="https://im4rob.github.io/" target="_blank" rel="noreferrer">
+          <h2>RSS25 Workshop</h2>
+          <p>1st Workshop on Leveraging Implicit Methods for Aerial Autonomy.</p>
+          <span class="button-signal">Open workshop</span>
+        </a>
+      </div>
+    </div>
+  </main>
+  <footer>
+    © 2025 Yuwei Wu | Quick access to interactive pages
+  </footer>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdXrX8CgHe0wVinciSQGX3QACYd/8o5lBfXqS/1ZRI6QYgn7QBYdwQQF7vbdDQ" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDuLQ8tZeQJTcNF9aokXn8YzW4z63jXKDhPcJfE=" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B0UglyR+LyhFdhS1H1z1g2VRor5uRqt0JV1wRSK/7Wkz5EIkRoV0Xl0Am3N7LJzD" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const dropdownToggle = document.querySelector(".nav-item.dropdown .nav-link.dropdown-toggle");
+      const dropdownMenu = document.querySelector(".nav-item.dropdown .dropdown-menu");
+      if (!dropdownToggle || !dropdownMenu) return;
+      dropdownToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        const isOpen = dropdownToggle.classList.toggle("show");
+        dropdownMenu.classList.toggle("show", isOpen);
+        dropdownToggle.setAttribute("aria-expanded", String(isOpen));
+      });
+      document.addEventListener("click", (event) => {
+        if (!dropdownToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+          dropdownToggle.classList.remove("show");
+          dropdownMenu.classList.remove("show");
+          dropdownToggle.setAttribute("aria-expanded", "false");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
