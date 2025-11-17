@@ -37,7 +37,7 @@
 
 	body{
 		font-family: Arial, serif, sans-serif;
-		font-weight: 200;
+		font-weight: 300;
 		font-size: 92%;
 		position: relative;
 		color: var(--color-text);
@@ -712,10 +712,115 @@
 		object-fit: cover;
 	}
 
-	.selected-label {
-		font-size: 0.9rem;
-		font-weight: 600;
-		padding: 0.65rem 0.8rem;
-		color: var(--color-heading);
-		text-align: center;
+.selected-label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	padding: 0.65rem 0.8rem;
+	color: var(--color-heading);
+	text-align: center;
+}
+
+.body_more {
+	background-color: #f5f6fa;
+	min-height: 100vh;
+	padding-top: 88px;
+	display: flex;
+	flex-direction: column;
+}
+
+.more-main {
+	flex: 1;
+	width: 100%;
+	max-width: 960px;
+	margin: 12px auto 32px;
+	padding: 0 16px 24px;
+	display: flex;
+	flex-direction: column;
+}
+
+.page-section {
+	margin-top: 20px;
+}
+
+.section-heading {
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--color-heading);
+	margin-bottom: 12px;
+}
+
+.button-row {
+	display: grid;
+	gap: 12px;
+}
+
+.demo-grid {
+	grid-template-columns: repeat(3, minmax(220px, 1fr));
+}
+
+.more-grid {
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	justify-content: center;
+}
+
+.resource-card {
+	background: #ffffff;
+	border-radius: 14px;
+	padding: 16px;
+	border: 1px solid rgba(60, 42, 77, 0.08);
+	text-decoration: none;
+	color: #1d1f26;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-height: 150px;
+	box-shadow: 0 8px 18px rgba(60, 42, 77, 0.08);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	font-family: "Lato", "Arial", sans-serif;
+}
+
+.resource-card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 20px 40px rgba(60, 42, 77, 0.15);
+}
+
+.resource-card h2 {
+	font-size: 18px;
+	margin: 0;
+}
+
+.resource-card p {
+	margin: 0;
+	color: rgba(45, 37, 66, 0.7);
+	line-height: 1.4;
+}
+
+.resource-card .button-signal {
+	margin-top: auto;
+	align-self: flex-start;
+	background: #8b5cf6;
+	color: #fff;
+	padding: 8px 14px;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+@media (max-width: 900px) {
+	.demo-grid {
+		grid-template-columns: repeat(2, minmax(220px, 1fr));
 	}
+}
+
+@media (max-width: 640px) {
+	.demo-grid {
+		grid-template-columns: repeat(1, minmax(0, 1fr));
+	}
+}

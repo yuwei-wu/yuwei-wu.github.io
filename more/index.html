@@ -5,121 +5,28 @@
   <title>Additional Links</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Secondary landing page with quick buttons to workshop info and interactive demos." />
+
+	
+  <!-- Bootstrap CSS (v4.5.2) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <!-- Google Fonts: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (latest - version 6.5.0) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+      <link rel="stylesheet" type="text/css" href="../style.css">		
+
+
+
+
+
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../style.css">
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap");
-    :root {
-      font-family: "Lato", Arial, sans-serif;
-      --hero-start: #28314d;
-      --hero-mid: #4d3d6f;
-      --hero-end: #8661a2;
-      --text-muted: rgba(60, 42, 77, 0.7);
-      --panel: #ffffff;
-      --border-light: rgba(255, 255, 255, 0.35);
-      --accent: #f9d36c;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      min-height: 100vh;
-      padding-top: 88px;
-      background: #f5f6fa;
-      color: #1d1f26;
-      display: flex;
-      flex-direction: column;
-    }
-    main {
-      flex: 1;
-      width: 100%;
-      max-width: 960px;
-      margin: 12px auto 32px;
-      padding: 0 16px 24px;
-    }
-    .page-section {
-      margin-top: 20px;
-    }
-    .section-heading {
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: rgba(60, 42, 77, 0.6);
-      margin-bottom: 12px;
-    }
-    .button-row {
-      display: grid;
-      gap: 12px;
-    }
-    .demo-grid {
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
-    }
-    .more-grid {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      justify-content: center;
-    }
-    .resource-card {
-      background: var(--panel);
-      border-radius: 14px;
-      padding: 16px;
-      border: 1px solid rgba(60, 42, 77, 0.08);
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      min-height: 150px;
-      box-shadow: 0 8px 18px rgba(60, 42, 77, 0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .resource-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 20px 40px rgba(60, 42, 77, 0.15);
-    }
-    .resource-card h2 {
-      font-size: 18px;
-      margin: 0;
-    }
-    .resource-card p {
-      margin: 0;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-    .resource-card .button-signal {
-      margin-top: auto;
-      align-self: flex-start;
-      background: #8b5cf6;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-weight: 600;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    footer {
-      text-align: center;
-      padding: 24px 0;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-    @media (max-width: 900px) {
-      .demo-grid {
-        grid-template-columns: repeat(2, minmax(220px, 1fr));
-      }
-    }
-    @media (max-width: 640px) {
-      .demo-grid {
-        grid-template-columns: repeat(1, minmax(0, 1fr));
-      }
-    }
-  </style>
 </head>
-<body>
+<body class="body_more">
   <nav class="navbar navbar-expand-xl navbar-custom fixed-top">
     <img class="Logo" src="../img/logo.png" type="32x32" alt="logo" />
     <div class="navbar-brand">
@@ -153,7 +60,7 @@
       </ul>
     </div>
   </nav>
-  <main>
+  <main class="more-main">
     <div class="page-section">
       <div class="section-heading">Demos</div>
       <div class="button-row demo-grid">
